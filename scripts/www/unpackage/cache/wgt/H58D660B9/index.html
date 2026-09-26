@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>中秋爱心</title>
+</head>
+<body style="background:#1a1a2e;margin:0;padding:0;width:100vw;height:100vh;overflow: hidden;">
+    <!-- 背景中秋粒子画布 新增炫酷动态特效 -->
+    <canvas id="starCanvas" style="position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;"></canvas>
+
+    <div id="login" style="width:100%;height:100%;display:flex;justify-content:center;align-items:center;position:relative;z-index:1;">
+        <div style="width:85%;max-width:400px;background:white;border-radius:24px;padding:40px 20px;text-align:center;box-shadow:0 0 30px rgba(255,217,61,0.3);">
+            <span style="font-size:60px;">🌕</span>
+            <h2 style="font-size:24px;color:#ff4757;margin:10px 0 30px;">中秋专属登录</h2>
+            <input id="acc" placeholder="账号：superuqvq" style="width:90%;height:50px;display:block;margin:10px auto;padding:0 15px;border:2px solid #eee;border-radius:12px;background:#f5f5f5;font-size:16px;">
+            <input id="pwd" type="password" placeholder="密码：123" style="width:90%;height:50px;display:block;margin:10px auto;padding:0 15px;border:2px solid #eee;border-radius:12px;background:#f5f5f5;font-size:16px;">
+            <div id="err" style="color:red;margin:10px 0;display:none;">密码错了哦~</div>
+            <div onclick="goMain()" style="width:90%;height:52px;line-height:52px;background:linear-gradient(90deg,#ff6b6b,#ffd93d);color:white;border-radius:30px;margin:20px auto 0;font-size:18px;cursor:pointer;">点我登录</div>
+        </div>
+    </div>
+
+    <div id="main" style="width:100%;height:100%;display:none;flex-direction:column;justify-content:center;align-items:center;position:relative;z-index:1;">
+        <div onclick="showChoose()" style="font-size:120px;animation:h 1s infinite alternate;cursor:pointer;text-shadow: 0 0 30px rgba(255,71,87,0.7);">❤️</div>
+        <p style="color:#ffd93d;font-size:18px;margin-top:25px;animation:floatTip 2s infinite ease-in-out;">点我开启中秋诗句盲盒</p >
+    </div>
+
+    <!-- 新增双选择弹窗 -->
+    <div id="choosePop" onclick="closeChoose()" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);display:none;justify-content:center;align-items:center;z-index:997;">
+        <div onclick="event.cancelBubble=true;" style="width:80%;max-width:360px;background:#fff9e6;border-radius:24px;padding:40px 20px;text-align:center;">
+            <span style="font-size:55px;">🤔</span>
+            <h2 style="font-size:26px;color:#d45d79;margin:15px 0 30px;">选一个你的专属中秋诗句</h2>
+            <div onclick="selectNo()" style="width:90%;height:52px;line-height:52px;background:#6a89cc;color:white;border-radius:30px;margin:15px auto;cursor:pointer;font-size:17px;">NO选项</div>
+            <div onclick="selectYes()" style="width:90%;height:52px;line-height:52px;background:#e55039;color:white;border-radius:30px;margin:15px auto;cursor:pointer;font-size:17px;">YES选项</div>
+        </div>
+    </div>
+
+    <!-- 两个不同结果弹窗 自带烟花特效触发 -->
+    <div id="resultPop" onclick="closeResult()" style="position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;justify-content:center;align-items:center;z-index:998;">
+        <div onclick="event.cancelBubble=true;" style="width:80%;max-width:360px;background:#fff9e6;border-radius:24px;padding:45px 20px;text-align:center;animation:popIn 0.6s ease-out forwards;">
+            <span id="resultIcon" style="font-size:70px;">🌙</span>
+            <p id="resultText" style="font-size:22px;color:#2c3e50;margin:25px 0 35px;line-height:1.8;font-weight:bold;"></p >
+            <div onclick="closeResult()" style="background:#ff6b6b;color:white;border-radius:30px;padding:12px 35px;display:inline-block;font-size:17px;cursor:pointer;">收到祝福啦</div>
+        </div>
+    </div>
+
+    <style>
+        @keyframes h {0% {transform:scale(1);}100% {transform:scale(1.2);}}
+        @keyframes floatTip {0%{transform: translateY(0);} 50%{transform: translateY(-8px);} 100%{transform: translateY(0);}}
+        @keyframes popIn {0% {transform: scale(0); opacity: 0;} 100% {transform: scale(1); opacity: 1;}}
+    </style>
+
+    <script>
+        // -------- 1. 背景中秋粒子动态特效 星星+飘落桂花 --------
+        const canvas = document.getElementById('starCanvas')
+        const ctx = canvas.getContext('2d')
+        canvas.width = window.innerWidth
+        canvas.height = window.innerHeight
+        let particles = []
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width
+                this.y = Math.random() * canvas.height
+                this.size = Math.random() * 3 + 1
+                this.speedY = Math.random() * 1 + 0.5
+                this.opacity = Math.random()
+                this.type = Math.random() > 0.9 ? 'flower' : 'star'
+            }
+            update() {
+                this.y += this.speedY
+                if(this.y > canvas.height) {
+                    this.y = 0
+                    this.x = Math.random() * canvas.width
+                }
+            }
+            draw() {
+                if(this.type === 'star') {
+                    ctx.fillStyle = `rgba(255,255,255,${this.opacity})`
+                    ctx.beginPath()
+                    ctx.arc(this.x, this.y, this.size, 0, Math.PI*2)
+                    ctx.fill()
+                } else {
+                    ctx.fillStyle = `rgba(255,217,61,${this.opacity})`
+                    ctx.font = `${this.size*5}px sans-serif`
+                    ctx.fillText('🌸', this.x, this.y)
+                }
+            }
+        }
+        for(let i=0;i<120;i++) particles.push(new Particle())
+        function animateCanvas() {
+            ctx.clearRect(0,0,canvas.width,canvas.height)
+            particles.forEach(p=>{
+                p.update()
+                p.draw()
+            })
+            requestAnimationFrame(animateCanvas)
+        }
+        animateCanvas()
+
+        // -------- 2. 语音独白工具函数 原生自带不需要任何第三方插件 --------
+        function speakText(text) {
+            // 先停止之前正在读的语音
+            window.speechSynthesis.cancel()
+            const utterance = new SpeechSynthesisUtterance()
+            utterance.text = text
+            utterance.lang = 'zh-CN'
+            utterance.volume = 1 // 音量最大
+            utterance.rate = 0.9 // 语速稍慢更温柔
+            utterance.pitch = 1.1 // 音调自然
+            window.speechSynthesis.speak(utterance)
+        }
+
+        // -------- 原有登录逻辑完全保留 --------
+        function goMain(){
+            if(document.getElementById('acc').value == 'superuqvq' && document.getElementById('pwd').value == '123'){
+                document.getElementById('login').style.display = 'none'
+                document.getElementById('main').style.display = 'flex'
+            }else{
+                document.getElementById('err').style.display = 'block'
+            }
+        }
+
+        // 点开爱心弹出双选择弹窗
+        function showChoose(){
+            document.getElementById('choosePop').style.display = 'flex'
+        }
+        function closeChoose(){
+            document.getElementById('choosePop').style.display = 'none'
+        }
+
+        // 选项1 对应诗句+语音
+        function selectNo(){
+            closeChoose()
+            const poem = '月有阴晴圆缺，但愿人长久，千里共婵娟'
+            document.getElementById('resultText').innerText = poem
+            document.getElementById('resultIcon').innerText = '🌕'
+            document.getElementById('resultPop').style.display = 'flex'
+            // 触发烟花特效
+            fireFirework()
+            // 自动朗读诗句
+            speakText(poem)
+        }
+
+        // 选项2 对应诗句+语音
+        function selectYes(){
+            closeChoose()
+            const poem = '自古逢秋悲寂寥，我言秋日胜春朝'
+            document.getElementById('resultText').innerText = poem
+            document.getElementById('resultIcon').innerText = '🍂'
+            document.getElementById('resultPop').style.display = 'flex'
+            // 触发烟花特效
+            fireFirework()
+            // 自动朗读诗句
+            speakText(poem)
+        }
+
+        function closeResult(){
+            document.getElementById('resultPop').style.display = 'none'
+        }
+
+        // 点击结果弹窗触发炫酷烟花特效
+        function fireFirework(){
+            for(let i=0;i<60;i++) {
+                setTimeout(()=>{
+                    const fire = document.createElement('div')
+                    fire.style.position = 'fixed'
+                    fire.style.left = Math.random()*100 + 'vw'
+                    fire.style.top = Math.random()*100 + 'vh'
+                    fire.style.width = '10px'
+                    fire.style.height = '10px'
+                    fire.style.borderRadius = '50%'
+                    fire.style.background = ['#ff6b6b','#ffd93d','#6a89cc','#d45d79','#78e08f'][Math.floor(Math.random()*5)]
+                    fire.style.zIndex = '9999'
+                    fire.style.animation = 'fire 1s ease-out forwards'
+                    document.body.appendChild(fire)
+                    setTimeout(()=>fire.remove(),1000)
+                }, i*20)
+            }
+        }
+        // 烟花动画注入
+        const style = document.createElement('style')
+        style.innerHTML = `@keyframes fire{0%{transform:scale(1);opacity:1;}100%{transform:scale(0);opacity:0;}}`
+        document.head.appendChild(style)
+    </script>
+</body>
+</html>
