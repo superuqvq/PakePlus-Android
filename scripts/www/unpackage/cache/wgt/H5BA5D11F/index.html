@@ -1,0 +1,3165 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>多功能娱乐平台</title>
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box;}
+        body{background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);font-family:Arial,sans-serif;color:#fff;width:100vw;height:100vh;overflow:hidden;}
+        
+        #loginPage{width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;position:fixed;top:0;left:0;z-index:9999;background:linear-gradient(135deg,#0f172a,#1e293b,#334155);}
+        .login-card{width:90%;max-width:420px;background:rgba(255,255,255,0.08);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:40px 30px;text-align:center;box-shadow:0 0 60px rgba(34,197,94,0.15);animation:fadeIn 0.8s ease-out;}
+        .login-card h2{font-size:28px;color:#22c55e;margin:10px 0;}
+        .login-card h3{font-size:14px;color:#94a3b8;margin-bottom:28px;}
+        .input-group{position:relative;margin:20px 0;}
+        .input-group input{width:100%;height:50px;padding:0 16px 0 48px;font-size:15px;color:#fff;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:12px;outline:none;}
+        .input-group input:focus{border-color:#22c55e;}
+        .input-group .icon{position:absolute;left:16px;top:50%;transform:translateY(-50%);}
+        #errTip{color:#ef4444;display:none;margin:10px 0;padding:8px;background:rgba(239,68,68,0.1);border-radius:8px;}
+        .login-btn{width:100%;height:50px;background:linear-gradient(90deg,#22c55e,#16a34a);border:none;border-radius:25px;margin-top:20px;font-size:17px;font-weight:600;color:#fff;cursor:pointer;transition:all 0.3s;}
+        .login-btn:hover{transform:translateY(-3px);box-shadow:0 10px 30px rgba(34,197,94,0.4);}
+        @keyframes fadeIn{from{opacity:0;transform:translateY(30px);}to{opacity:1;transform:translateY(0);}}
+        
+        .page{width:100vw;height:100vh;display:none;flex-direction:column;justify-content:center;align-items:center;padding:20px;position:fixed;top:0;left:0;background:linear-gradient(135deg,#0f0c29,#302b63,#24243e);}
+        .page.active{display:flex;animation:pageIn 0.5s ease-out;}
+        @keyframes pageIn{from{opacity:0;transform:translateY(40px);}to{opacity:1;transform:translateY(0);}}
+        .page h1{font-size:36px;margin-bottom:10px;background:linear-gradient(90deg,#22c55e,#3b82f6,#f59e0b);-webkit-background-clip:text;-webkit-text-fill-color:transparent;}
+        .page p{color:#94a3b8;margin-bottom:40px;font-size:16px;text-align:center;}
+        
+        .menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:24px;max-width:500px;width:100%;}
+        .menu-grid.three{grid-template-columns:1fr 1fr 1fr;max-width:600px;}
+        .menu-grid.single{grid-template-columns:1fr;max-width:300px;}
+        
+        .ellipse-btn{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:30px 20px;border-radius:50px;background:rgba(255,255,255,0.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.1);cursor:pointer;text-decoration:none;color:#fff;transition:all 0.4s cubic-bezier(0.68,-0.55,0.27,1.55);overflow:hidden;min-height:120px;user-select:none;}
+        .ellipse-btn::before{content:'';position:absolute;top:50%;left:50%;width:0;height:0;transform:translate(-50%,-50%);background:radial-gradient(circle,rgba(255,255,255,0.1),transparent 70%);transition:width 0.6s ease,height 0.6s ease;}
+        .ellipse-btn:hover::before{width:300px;height:300px;}
+        .ellipse-btn:hover{transform:translateY(-8px) scale(1.05);box-shadow:0 20px 40px rgba(0,0,0,0.3);}
+        .ellipse-btn .emoji{font-size:40px;margin-bottom:8px;z-index:1;transition:transform 0.3s ease;}
+        .ellipse-btn:hover .emoji{transform:scale(1.2) rotate(-5deg);}
+        .ellipse-btn .name{font-size:18px;font-weight:600;z-index:1;letter-spacing:1px;}
+        .ellipse-btn .sub{font-size:12px;color:rgba(255,255,255,0.5);margin-top:4px;z-index:1;}
+        .ellipse-btn::after{content:'';position:absolute;inset:-2px;border-radius:52px;background:conic-gradient(from 0deg,transparent,currentColor,transparent 60%);opacity:0;transition:opacity 0.5s ease;z-index:-1;}
+        .ellipse-btn:hover::after{opacity:0.3;animation:glow-pulse 2s ease-in-out infinite;}
+        @keyframes glow-pulse{0%,100%{opacity:0.3;}50%{opacity:0.6;}}
+        
+        .back-btn{position:absolute;top:20px;left:20px;width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,0.08);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,0.15);display:flex;align-items:center;justify-content:center;font-size:24px;cursor:pointer;color:#fff;transition:all 0.3s ease;z-index:10;}
+        .back-btn:hover{background:rgba(255,255,255,0.15);transform:scale(1.1) translateX(-3px);box-shadow:0 5px 20px rgba(0,0,0,0.3);}
+        
+        .vocab-card{background:rgba(255,255,255,0.06);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:24px;padding:30px;max-width:600px;width:100%;text-align:center;animation:cardIn 0.6s ease-out;}
+        @keyframes cardIn{from{opacity:0;transform:scale(0.9) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
+        .vocab-card .word{font-size:42px;font-weight:700;color:#facc15;margin:10px 0;text-shadow:0 0 20px rgba(250,204,21,0.3);}
+        .vocab-card .meaning{font-size:22px;color:#e2e8f0;margin:10px 0;}
+        .vocab-card .example{font-size:15px;color:#94a3b8;margin:15px 0;padding:15px;background:rgba(0,0,0,0.2);border-radius:12px;line-height:1.6;}
+        .vocab-controls{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:10px;}
+        .vocab-controls button{padding:12px 30px;border-radius:50px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:15px;cursor:pointer;transition:all 0.3s ease;}
+        .vocab-controls button:hover{background:rgba(255,255,255,0.15);transform:translateY(-3px);}
+        .vocab-progress{color:#94a3b8;font-size:14px;margin:10px 0;}
+        .vocab-level{display:inline-block;padding:6px 20px;border-radius:50px;font-size:13px;font-weight:600;margin-bottom:10px;}
+        .vocab-level.cet4{background:rgba(168,85,247,0.3);color:#a855f7;border:1px solid rgba(168,85,247,0.3);}
+        .vocab-level.cet6{background:rgba(236,72,153,0.3);color:#ec4899;border:1px solid rgba(236,72,153,0.3);}
+        .speak-btn{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:50px;border:1px solid rgba(250,204,21,0.3);background:rgba(250,204,21,0.1);color:#facc15;font-size:14px;cursor:pointer;transition:all 0.3s ease;margin-top:10px;}
+        .speak-btn:hover{background:rgba(250,204,21,0.2);transform:translateY(-3px);box-shadow:0 5px 15px rgba(250,204,21,0.2);}
+        
+        .game-container{width:100%;max-width:500px;height:400px;background:rgba(0,0,0,0.3);border-radius:20px;overflow:hidden;position:relative;border:1px solid rgba(255,255,255,0.1);margin-bottom:15px;}
+        .game-container canvas{width:100%;height:100%;display:block;}
+        .game-score{font-size:18px;color:#facc15;margin-bottom:10px;}
+        .game-controls{display:flex;gap:10px;justify-content:center;}
+        .game-controls button{padding:10px 25px;border-radius:50px;border:1px solid rgba(255,255,255,0.2);background:rgba(255,255,255,0.08);color:#fff;font-size:14px;cursor:pointer;transition:all 0.3s ease;}
+        .game-controls button:hover{background:rgba(255,255,255,0.15);transform:translateY(-3px);}
+        
+        @media(max-width:480px){.menu-grid,.menu-grid.three{grid-template-columns:1fr;gap:16px;}.ellipse-btn{min-height:90px;padding:20px;}.page h1{font-size:28px;}.login-card{padding:30px 20px;}.vocab-card .word{font-size:32px;}.game-container{height:300px;}}
+    </style>
+</head>
+<body>
+    <div id="loginPage">
+        <div class="login-card">
+            <h2>🎮 多功能娱乐平台</h2>
+            <h3>音乐 · 游戏 · 英语学习</h3>
+            <div class="input-group"><span class="icon">👤</span><input id="username" type="text" placeholder="账号" value="superuqvq"></div>
+            <div class="input-group"><span class="icon">🔒</span><input id="password" type="password" placeholder="密码" value="123"></div>
+            <div id="errTip">❌ 账号或密码错误，请重试</div>
+            <button class="login-btn" onclick="login()">🚀 进入主界面</button>
+        </div>
+    </div>
+    
+    <div id="mainOptions" class="page active">
+        <h1>🎯 选择你的频道</h1>
+        <div class="menu-grid three">
+            <div class="ellipse-btn" onclick="showPage('musicPage')"><span class="emoji">🎵</span><span class="name">音乐平台</span><span class="sub">网易云 / QQ / 酷狗 / 汽水</span></div>
+            <div class="ellipse-btn" onclick="showPage('gamePage')"><span class="emoji">🎮</span><span class="name">小游戏</span><span class="sub">跳跳乐 / 飞机大战</span></div>
+            <div class="ellipse-btn" onclick="showPage('englishPage')"><span class="emoji">📚</span><span class="name">英语单词</span><span class="sub">四级 / 六级词汇</span></div>
+            <div class="ellipse-btn" onclick="showPage('pinyinPage')"><span class="emoji">🔤</span><span class="name">拼音学习</span></div>
+            <div class="ellipse-btn" onclick="showPage('phoneticsPage')"><span class="emoji">🗣️</span><span class="name">英语发音</span></div>
+        </div>
+    </div>
+    
+    <div id="musicPage" class="page">
+        <div class="back-btn" onclick="showPage('mainOptions')">←</div>
+        <h1>🎵 选择音乐平台</h1>
+        <div class="menu-grid">
+            <a class="ellipse-btn" href="https://music.163.com" target="_blank"><span class="emoji">🎵</span><span class="name">网易云音乐</span><span class="sub">发现好音乐</span></a>
+            <a class="ellipse-btn" href="https://y.qq.com" target="_blank"><span class="emoji">🎶</span><span class="name">QQ音乐</span><span class="sub">听我想听</span></a>
+            <a class="ellipse-btn" href="https://www.kugou.com" target="_blank"><span class="emoji">🎤</span><span class="name">酷狗音乐</span><span class="sub">就是歌多</span></a>
+            <a class="ellipse-btn" href="https://www.qishuiyue.com" target="_blank"><span class="emoji">🥤</span><span class="name">汽水音乐</span><span class="sub">年轻人的音乐</span></a>
+        </div>
+    </div>
+    
+    <div id="gamePage" class="page">
+        <div class="back-btn" onclick="showPage('mainOptions')">←</div>
+        <h1>🎮 选择小游戏</h1>
+        <div class="menu-grid">
+            <div class="ellipse-btn" onclick="startJumpGame()"><span class="emoji">🦘</span><span class="name">跳跳乐</span><span class="sub">躲避障碍，挑战高分</span></div>
+            <div class="ellipse-btn" onclick="showPage('planeWarPage')"><span class="emoji">✈️</span><span class="name">飞机大战</span></div>
+            <div class="ellipse-btn" onclick="showPage('gobangPage')"><span class="emoji">⚫</span><span class="name">五子棋AI</span></div>
+            <div class="ellipse-btn" onclick="showPage('chessPage')"><span class="emoji">♚</span><span class="name">象棋AI</span></div>
+            <div class="ellipse-btn" onclick="showPage('bombPage')"><span class="emoji">💣</span><span class="name">弹弹堂</span></div>
+		</div>
+    </div>
+	<!-- ========== 拼音学习页面 ========== -->
+	<div id="pinyinPage" class="page">
+	  <div class="back-btn" onclick="showPage('gamePage')"><-</div>
+	  <h1>🔤 拼音学习</h1>
+	  
+	  <!-- 拼音规则卡片 -->
+	  <div class="section-card">
+	    <h3>📖 拼音基础规则</h3>
+	    <div class="rule-grid">
+	      <div class="rule-item" onclick="playPinyinAudio('a')">
+	        <span class="rule-letter">ā</span>
+	        <span class="rule-name">第一声</span>
+	        <span class="rule-desc">高平调 (55)</span>
+	      </div>
+	      <div class="rule-item" onclick="playPinyinAudio('á')">
+	        <span class="rule-letter">á</span>
+	        <span class="rule-name">第二声</span>
+	        <span class="rule-desc">升调 (35)</span>
+	      </div>
+	      <div class="rule-item" onclick="playPinyinAudio('ǎ')">
+	        <span class="rule-letter">ǎ</span>
+	        <span class="rule-name">第三声</span>
+	        <span class="rule-desc">降升调 (214)</span>
+	      </div>
+	      <div class="rule-item" onclick="playPinyinAudio('à')">
+	        <span class="rule-letter">à</span>
+	        <span class="rule-name">第四声</span>
+	        <span class="rule-desc">降调 (51)</span>
+	      </div>
+	    </div>
+	  </div>
+	  
+	  <!-- 声母表 -->
+	  <div class="section-card">
+	    <h3>🔠 声母表 (Initials)</h3>
+	    <div class="phonetic-table" id="pinyinInitials">
+	      <div class="table-row header">
+	        <div class="table-cell">声母</div>
+	        <div class="table-cell">国际音标</div>
+	        <div class="table-cell">类似英语</div>
+	        <div class="table-cell">示例</div>
+	      </div>
+	    </div>
+	  </div>
+	  
+	  <!-- 韵母表 -->
+	  <div class="section-card">
+	    <h3>🔡 韵母表 (Finals)</h3>
+	    <div class="phonetic-table" id="pinyinFinals">
+	      <div class="table-row header">
+	        <div class="table-cell">韵母</div>
+	        <div class="table-cell">国际音标</div>
+	        <div class="table-cell">类似英语</div>
+	        <div class="table-cell">示例</div>
+	      </div>
+	    </div>
+	  </div>
+	  
+	  <!-- 互动练习区 -->
+	  <div class="section-card">
+	    <h3>🎯 互动拼读练习</h3>
+	    <div class="practice-area">
+	      <div class="practice-display" id="pinyinDisplay">bā</div>
+	      <div class="practice-controls">
+	        <button onclick="playPinyinAudio(document.getElementById('pinyinDisplay').textContent)">🔊 听发音</button>
+	        <button onclick="generatePinyin()">🎲 随机生成</button>
+	      </div>
+	      <div class="practice-meaning" id="pinyinMeaning">八 (eight)</div>
+	    </div>
+	  </div>
+	</div>
+	
+	<!-- ========== 英语发音规则页面 ========== -->
+	<div id="phoneticsPage" class="page">
+	  <div class="back-btn" onclick="showPage('gamePage')"><-</div>
+	  <h1>🗣️ 英语发音规则</h1>
+	  
+	  <div class="tab-bar" style="display: flex; border-radius: 12px; overflow: hidden; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+	    <button class="tab-btn active" style="flex: 1; padding: 12px; border: none; font-size: 16px; cursor: pointer; background: #e74c3c; color: #fff; font-weight: bold;" onclick="switchSubTab('vowels')">🔊 元音</button>
+	    <button class="tab-btn" style="flex: 1; padding: 12px; border: none; font-size: 16px; cursor: pointer; background: #ecf0f1; color: #555; font-weight: bold;" onclick="switchSubTab('consonants')">🔇 辅音</button>
+	    <button class="tab-btn" style="flex: 1; padding: 12px; border: none; font-size: 16px; cursor: pointer; background: #ecf0f1; color: #555; font-weight: bold;" onclick="switchSubTab('rules')">📐 规则</button>
+	  </div>
+	  
+	  <!-- 元音 -->
+	  <div id="vowelsPanel" class="panel-content">
+	    <div class="section-card">
+	      <h3>🔊 单元音</h3>
+	      <div class="phone-grid" id="vowelList"></div>
+	    </div>
+	    <div class="section-card">
+	      <h3>🔊 双元音</h3>
+	      <div class="phone-grid" id="diphthongList"></div>
+	    </div>
+	  </div>
+	  
+	  <!-- 辅音 -->
+	  <div id="consonantsPanel" class="panel-content" style="display: none;">
+	    <div class="section-card">
+	      <h3>🔇 清辅音</h3>
+	      <div class="phone-grid" id="voicelessList"></div>
+	    </div>
+	    <div class="section-card">
+	      <h3>🔇 浊辅音</h3>
+	      <div class="phone-grid" id="voicedList"></div>
+	    </div>
+	  </div>
+	  
+	  <!-- 发音规则 -->
+	  <div id="rulesPanel" class="panel-content" style="display: none;">
+	    <div class="section-card">
+	      <h3>📐 重要发音规则</h3>
+	      <div class="rules-list" id="rulesList"></div>
+	    </div>
+	  </div>
+	  
+	  <!-- 发音练习区 -->
+	  <div class="section-card">
+	    <h3>🎤 发音练习</h3>
+	    <div class="practice-area">
+	      <div class="practice-display" id="phoneticDisplay">/θɪŋk/</div>
+	      <div class="practice-controls">
+	        <button onclick="playPhoneticAudio()">🔊 听发音</button>
+	        <button onclick="generatePhonetic()">🎲 随机单词</button>
+	      </div>
+	      <div class="practice-meaning" id="phoneticMeaning">think (思考)</div>
+	    </div>
+	  </div>
+	</div>
+    
+	<!-- 五子棋页面 -->
+	<div id="gobangPage" class="page">
+	  <div class="back-btn" onclick="showPage('gamePage')"><-</div>
+	  <h1>⚫ 五子棋 AI对战</h1>
+	  <div class="game-container">
+	    <canvas id="gobangCanvas" width="450" height="450"></canvas>
+	  </div>
+	  <div class="game-score" id="gobangStatus">你执黑先行，点击棋盘落子</div>
+	  <div class="game-controls">
+	    <button onclick="gobangRestart()">🔄 重新开始</button>
+	    <button onclick="gobangHint()">💡 AI提示</button>
+	  </div>
+	</div>
+	<!-- ========== 弹弹堂页面 ========== -->
+	<div id="bombPage" class="page">
+	  <div class="back-btn" onclick="showPage('gamePage')"><-</div>
+	  <h1>💣 弹弹堂</h1>
+	  <div class="game-container">
+	    <canvas id="bombCanvas" width="800" height="500"></canvas>
+	  </div>
+	  <div class="game-score" id="bombStatus">
+	    ❤️ <span id="p1Health">100</span> &nbsp;|&nbsp; 
+	    🤖 <span id="p2Health">100</span> &nbsp;|&nbsp; 
+	    🎯 回合: <span id="bombTurn">玩家</span>
+	  </div>
+	  <div class="game-controls">
+	    <div class="control-group">
+	      <label>角度: <span id="angleDisplay">45</span>°</label>
+	      <input type="range" id="angleSlider" min="0" max="90" value="45" step="1">
+	    </div>
+	    <div class="control-group">
+	      <label>力度: <span id="powerDisplay">50</span>%</label>
+	      <input type="range" id="powerSlider" min="10" max="100" value="50" step="1">
+	    </div>
+	    <button onclick="bombFire()">🚀 发射！</button>
+	    <button onclick="bombReset()">🔄 重新开始</button>
+	  </div>
+	  <div class="pl-hint">调整角度和力度，点击发射！击败AI对手！</div>
+	</div>
+	
+	<!-- 中国象棋页面 -->
+	<div id="chessPage" class="page">
+	  <div class="back-btn" onclick="showPage('gamePage')"><-</div>
+	  <h1>♚ 中国象棋 AI对战</h1>
+	  <div class="game-container">
+	    <canvas id="chessCanvas" width="480" height="540"></canvas>
+	  </div>
+	  <div class="game-score" id="chessStatus">红方先行，点击棋子选中再点击目标位置</div>
+	  <div class="game-controls">
+	    <button onclick="chessRestart()">🔄 重新开始</button>
+	    <button onclick="chessHint()">💡 AI提示</button>
+	  </div>
+	</div>
+    <div id="jumpGamePage" class="page">
+        <div class="back-btn" onclick="showPage('gamePage')">←</div>
+        <h1>🦘 跳跳乐</h1>
+        <div class="game-score">得分: <span id="jumpScore">0</span></div>
+        <div class="game-container"><canvas id="jumpCanvas"></canvas></div>
+        <div class="game-controls">
+            <button onclick="startJumpGame()">🔄 重新开始</button>
+            <button onclick="showPage('gamePage')">🚪 返回</button>
+        </div>
+    </div>
+    
+    <div id="englishPage" class="page">
+        <div class="back-btn" onclick="showPage('mainOptions')">←</div>
+        <h1>📚 英语词汇学习</h1>
+        <div class="menu-grid">
+            <div class="ellipse-btn" onclick="startVocabulary('cet4')"><span class="emoji">📖</span><span class="name">英语四级</span><span class="sub">CET-4 核心词汇</span></div>
+            <div class="ellipse-btn" onclick="startVocabulary('cet6')"><span class="emoji">📕</span><span class="name">英语六级</span><span class="sub">CET-6 进阶词汇</span></div>
+        </div>
+    </div>
+    
+    <div id="vocabularyPage" class="page">
+        <div class="back-btn" onclick="showPage('englishPage')">←</div>
+        <h1>📖 词汇学习</h1>
+        <div class="vocab-card" id="vocabCard">
+            <div class="vocab-level" id="vocabLevel">四级</div>
+            <div class="vocab-progress" id="vocabProgress">第 1 / 20 个</div>
+            <div class="word" id="vocabWord">abandon</div>
+            <div class="meaning" id="vocabMeaning">放弃，遗弃</div>
+            <div class="example" id="vocabExample">He had to abandon his plan due to lack of funding.</div>
+            <button class="speak-btn" onclick="speakWord()">🔊 朗读发音</button>
+            <div class="vocab-controls">
+                <button onclick="prevWord()">◀ 上一个</button>
+                <button onclick="nextWord()">下一个 ▶</button>
+                <button onclick="shuffleWords()">🔀 随机</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentWords = [], currentIndex = 0, currentLevel = 'cet4';
+        
+        const cet4Words = [
+            {word:'abandon',meaning:'放弃，遗弃',example:'He had to abandon his plan due to lack of funding.'},
+            {word:'ability',meaning:'能力，才能',example:'She has the ability to solve complex problems.'},
+            {word:'absorb',meaning:'吸收，吸引',example:'Plants absorb carbon dioxide from the air.'},
+            {word:'academic',meaning:'学术的，学院的',example:'He has a strong academic background in physics.'},
+            {word:'access',meaning:'进入，通道',example:'Students have access to the library 24/7.'},
+            {word:'accompany',meaning:'陪伴，伴随',example:'I will accompany you to the airport.'},
+            {word:'accomplish',meaning:'完成，实现',example:'She accomplished her goal of running a marathon.'},
+            {word:'accurate',meaning:'准确的，精确的',example:'The data must be accurate for the experiment.'},
+            {word:'achieve',meaning:'达到，取得',example:'He worked hard to achieve his dreams.'},
+            {word:'acknowledge',meaning:'承认，确认',example:'She acknowledged her mistake and apologized.'},
+            {word:'acquire',meaning:'获得，学到',example:'It takes time to acquire a new language.'},
+            {word:'adapt',meaning:'适应，改编',example:'Animals must adapt to their environment.'},
+            {word:'adequate',meaning:'足够的，充分的',example:'We need adequate time to complete the project.'},
+            {word:'adjust',meaning:'调整，调节',example:'You can adjust the volume using this button.'},
+            {word:'admire',meaning:'钦佩，赞赏',example:'I admire her courage and determination.'},
+            {word:'adopt',meaning:'采纳，收养',example:'The company decided to adopt new technology.'},
+            {word:'advance',meaning:'前进，进步',example:'Technology continues to advance rapidly.'},
+            {word:'advantage',meaning:'优势，有利条件',example:'Being bilingual is a great advantage.'},
+            {word:'adventure',meaning:'冒险，奇遇',example:'They set off on a great adventure.'},
+            {word:'affection',meaning:'喜爱，感情',example:'She showed great affection for her pet dog.'},
+			{ word: 'afford', meaning: '买得起，承担得起', example: 'We can\'t afford to buy a new house right now.' },
+			{ word: 'agency', meaning: '代理，机构', example: 'She works for a travel agency downtown.' },
+			{ word: 'agenda', meaning: '议程，日程', example: 'What\'s on the agenda for today\'s meeting?' },
+			{ word: 'agent', meaning: '代理人，特工', example: 'My travel agent arranged all my flights and hotels.' },
+			{ word: 'aggressive', meaning: '好斗的，有进取心的', example: 'He is an aggressive salesman who always meets his targets.' },
+			{ word: 'agree', meaning: '同意，赞成', example: 'I agree with your opinion on this issue.' },
+			{ word: 'agriculture', meaning: '农业，农学', example: 'Agriculture still employs millions of people in this country.' },
+			{ word: 'aid', meaning: '帮助，援助', example: 'The Red Cross sent food aid to the disaster area.' },
+			{ word: 'aim', meaning: '目标，瞄准', example: 'Our main aim is to increase sales by 20% this year.' },
+			{ word: 'alarm', meaning: '警报，惊恐', example: 'The fire alarm went off when the smoke was detected.' },
+			{ word: 'alcohol', meaning: '酒精，乙醇', example: 'He never drinks alcohol because of his health.' },
+			{ word: 'alert', meaning: '警觉的，警报', example: 'The police warned the public to be alert for pickpockets.' },
+			{ word: 'alive', meaning: '活着的，有活力的', example: 'After the earthquake, rescuers found 10 people alive.' },
+			{ word: 'allow', meaning: '允许，准许', example: 'They don\'t allow smoking in this building.' },
+			{ word: 'almost', meaning: '几乎，差不多', example: 'I almost missed the train this morning.' },
+			{ word: 'alone', meaning: '独自的，单独的', example: 'She lives alone in a small apartment near the park.' },
+			{ word: 'along', meaning: '沿着，顺着', example: 'We walked along the river after dinner.' },
+			{ word: 'aloud', meaning: '大声地，出声地', example: 'The teacher asked me to read the passage aloud.' },
+			{ word: 'alphabet', meaning: '字母表', example: 'English alphabet has 26 letters from A to Z.' },
+			{ word: 'already', meaning: '已经', example: 'I have already finished my homework.' },
+			{ word: 'although', meaning: '虽然，尽管', example: 'Although it rained, we still had a good trip.' },
+			{ word: 'altogether', meaning: '总共，完全', example: 'There are 50 students altogether in our grade.' },
+			{ word: 'amazing', meaning: '令人惊奇的，了不起的', example: 'That\'s an amazing achievement! I\'m so proud of you.' },
+			{ word: 'ambition', meaning: '野心，抱负', example: 'His biggest ambition is to become a successful writer.' },
+			{ word: 'amount', meaning: '数量，总额', example: 'A large amount of money was spent on the new bridge.' },
+			{ word: 'amuse', meaning: '逗乐，使发笑', example: 'My silly stories amused the children for hours.' },
+			{ word: 'analysis', meaning: '分析，解析', example: 'The data analysis shows a clear trend in consumer behavior.' },
+			{ word: 'ancestor', meaning: '祖先，祖宗', example: 'My ancestors came to this country from Ireland in 1850.' },
+			{ word: 'ancient', meaning: '古代的，古老的', example: 'There are many ancient temples in this part of the world.' },
+			{ word: 'anger', meaning: '愤怒，怒气', example: 'He could not hide his anger when he heard the news.' },
+			{ word: 'animal', meaning: '动物，兽', example: 'The zoo has over 500 different kinds of animals.' },
+			{ word: 'announce', meaning: '宣布，宣告', example: 'The company announced a new product line at the conference.' },
+			{ word: 'annoy', meaning: '使恼怒，打扰', example: 'It annoys me when people are late for meetings.' },
+			{ word: 'another', meaning: '另一个，不同的', example: 'Could I have another cup of coffee please?' },
+			{ word: 'answer', meaning: '回答，答案', example: 'Can you tell me the answer to this question?' },
+			{ word: 'anxiety', meaning: '焦虑，担心', example: 'She felt a lot of anxiety before her final exam.' },
+			{ word: 'apologize', meaning: '道歉，认错', example: 'He called me to apologize for being late.' },
+			{ word: 'appear', meaning: '出现，似乎', example: 'A strange figure appeared at the end of the street.' },
+			{ word: 'application', meaning: '申请，应用', example: 'You need to fill out this application form first.' },
+			{ word: 'approach', meaning: '靠近，方法', example: 'We need a new approach to solve this problem.' },
+			{ word: 'appropriate', meaning: '适当的，合适的', example: 'Is this dress appropriate for a formal occasion?' },
+			{ word: 'approve', meaning: '批准，赞成', example: 'The committee approved the new budget proposal.' },
+			{ word: 'argue', meaning: '争论，辩论', example: 'They always argue about small things like housework.' },
+			{ word: 'arrange', meaning: '安排，整理', example: 'Could you arrange a meeting for us next week?' },
+			{ word: 'arrest', meaning: '逮捕，阻止', example: 'The thief was arrested by the police last night.' },
+			{ word: 'artificial', meaning: '人工的，人造的', example: 'I don\'t like artificial sweeteners in my drink.' },
+			{ word: 'assign', meaning: '分配，指派', example: 'The teacher assigned us three chapters to read.' },
+			{ word: 'assist', meaning: '帮助，协助', example: 'The nurse will assist the doctor during the surgery.' },
+			{ word: 'assume', meaning: '假设，承担', example: 'I assume you have all finished your homework.' },
+			{ word: 'atmosphere', meaning: '气氛，大气层', example: 'The restaurant has a warm and cozy atmosphere.' },
+			{ word: 'attach', meaning: '附上，贴上', example: 'Please attach your resume to the email.' },
+			{ word: 'attempt', meaning: '尝试，企图', example: 'She made an attempt to climb the mountain.' },
+			{ word: 'attend', meaning: '出席，参加', example: 'All students must attend the lecture tomorrow.' },
+			{ word: 'attitude', meaning: '态度，看法', example: 'He has a very positive attitude towards life.' },
+			{ word: 'attract', meaning: '吸引，引起', example: 'The museum attracts millions of visitors every year.' },
+			{ word: 'audience', meaning: '观众，听众', example: 'The audience clapped loudly after the performance.' },
+			{ word: 'authority', meaning: '权威，权力', example: 'The school authorities have the right to make rules.' },
+			{ word: 'available', meaning: '可用的，有效的', example: 'Are there any seats available for the concert?' },
+			{ word: 'average', meaning: '平均的，普通的', example: 'The average temperature in summer is about 30 degrees.' },
+			{ word: 'avoid', meaning: '避免，避开', example: 'You should avoid eating too much sugar.' },
+			{ word: 'awake', meaning: '醒着的，唤醒', example: 'I was still awake at midnight thinking about the exam.' },
+			{ word: 'award', meaning: '奖励，授予', example: 'She received an award for her excellent performance.' },
+			{ word: 'aware', meaning: '意识到，知道的', example: 'Are you aware of the dangers of smoking?' },
+			{ word: 'awful', meaning: '极坏的，可怕的', example: 'The weather was awful last weekend, it rained all day.' },
+			{ word: 'awkward', meaning: '尴尬的，笨拙的', example: 'There was an awkward silence after his joke.' },
+			{ word: 'background', meaning: '背景，出身', example: 'What is your educational background?' },
+			{ word: 'balance', meaning: '平衡，余额', example: 'You need to balance your work and your family life.' },
+			{ word: 'barrier', meaning: '障碍，屏障', example: 'The language barrier made communication difficult.' },
+			{ word: 'basis', meaning: '基础，根据', example: 'Basis of this theory is found in ancient philosophy.' },
+			{ word: 'battery', meaning: '电池，殴打', example: 'The phone battery died after 2 hours of use.' },
+			{ word: 'bear', meaning: '忍受，承担', example: 'I can\'t bear the pain anymore, please help me.' },
+			{ word: 'benefit', meaning: '好处，利益', example: 'Exercise has many health benefits for your body.' },
+			{ word: 'besides', meaning: '此外，除了', example: 'Besides English, he can speak three other languages.' },
+			{ word: 'betray', meaning: '背叛，出卖', example: 'He felt his friend had betrayed his trust.' },
+			{ word: 'beyond', meaning: '超过，在...之外', example: 'This problem is beyond my understanding.' },
+			{ word: 'billion', meaning: '十亿', example: 'The company is worth over 5 billion dollars.' },
+			{ word: 'bitter', meaning: '苦的，痛苦的', example: 'The medicine tastes very bitter, but it works well.' },
+			{ word: 'blame', meaning: '责备，归咎于', example: 'Don\'t blame yourself for what happened.' },
+			{ word: 'blank', meaning: '空白的，茫然', example: 'My mind went completely blank during the exam.' },
+			{ word: 'blast', meaning: '爆炸，摧毁', example: 'The blast could be heard from miles away.' },
+			{ word: 'bleed', meaning: '流血，出血', example: 'His nose started to bleed when he hit the door.' },
+			{ word: 'bless', meaning: '祝福，保佑', example: 'May God bless you and your family.' },
+			{ word: 'blind', meaning: '盲目的，看不见的', example: 'He is blind in one eye after the accident.' },
+			{ word: 'block', meaning: '街区，阻碍', example: 'The road is blocked due to construction work.' },
+        ];
+        
+        const cet6Words = [
+            {word:'abundance',meaning:'丰富，充裕',example:'The region has an abundance of natural resources.'},
+            {word:'accommodate',meaning:'容纳，提供住宿',example:'The hotel can accommodate up to 500 guests.'},
+            {word:'accumulate',meaning:'积累，积聚',example:'Dust accumulates quickly without regular cleaning.'},
+            {word:'ambiguous',meaning:'模糊的，含糊的',example:'His response was ambiguous and difficult to interpret.'},
+            {word:'ambitious',meaning:'有雄心的，有抱负的',example:'She is an ambitious young lawyer.'},
+            {word:'annually',meaning:'每年地',example:'The event is held annually in the city center.'},
+            {word:'apprehension',meaning:'忧虑，恐惧',example:'He felt apprehension before the exam.'},
+            {word:'arbitrary',meaning:'任意的，武断的',example:'The decision seemed arbitrary and unfair.'},
+            {word:'attribute',meaning:'属性，特征',example:'Patience is an important attribute for a teacher.'},
+            {word:'bureaucracy',meaning:'官僚主义，官僚机构',example:'The bureaucracy slowed down the process.'},
+            {word:'coincidence',meaning:'巧合，碰巧',example:'It was pure coincidence that we met.'},
+            {word:'commitment',meaning:'承诺，投入',example:'We need commitment from both sides.'},
+            {word:'compensate',meaning:'补偿，弥补',example:'The company will compensate you for losses.'},
+            {word:'comprehensive',meaning:'全面的，综合的',example:'We need a comprehensive review.'},
+            {word:'contradict',meaning:'矛盾，反驳',example:'His actions contradict his words.'},
+            {word:'controversy',meaning:'争议，争论',example:'The new policy sparked controversy.'},
+            {word:'correspond',meaning:'对应，通信',example:'The numbers correspond to categories.'},
+            {word:'deteriorate',meaning:'恶化，变坏',example:'His health began to deteriorate.'},
+            {word:'discipline',meaning:'纪律，学科',example:'Self-discipline is the key to success.'},
+            {word:'discrimination',meaning:'歧视，辨别',example:'Fight against racial discrimination.'}
+        ];
+        
+        function showPage(id){
+            document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+        }
+        
+        function login(){
+            const u = document.getElementById('username').value.trim();
+            const p = document.getElementById('password').value.trim();
+            if(u==='superuqvq' && p==='123'){
+                document.getElementById('loginPage').style.display='none';
+                showPage('mainOptions');
+            } else {
+                const t = document.getElementById('errTip');
+                t.style.display='block';
+                setTimeout(()=>t.style.display='none',3000);
+            }
+        }
+        document.addEventListener('keydown',e=>{if(e.key==='Enter')login();});
+        
+        function startVocabulary(level){
+            currentLevel = level;
+            currentWords = level==='cet4' ? [...cet4Words] : [...cet6Words];
+            currentIndex = 0;
+            showPage('vocabularyPage');
+            updateVocabDisplay();
+        }
+        
+        function updateVocabDisplay(){
+            const w = currentWords[currentIndex];
+            document.getElementById('vocabLevel').textContent = currentLevel==='cet4' ? '四级' : '六级';
+            document.getElementById('vocabLevel').className = 'vocab-level ' + currentLevel;
+            document.getElementById('vocabProgress').textContent = `第 ${currentIndex+1} / ${currentWords.length} 个`;
+            document.getElementById('vocabWord').textContent = w.word;
+            document.getElementById('vocabMeaning').textContent = w.meaning;
+            document.getElementById('vocabExample').textContent = w.example;
+        }
+        
+        function nextWord(){if(currentIndex<currentWords.length-1){currentIndex++;updateVocabDisplay();}}
+        function prevWord(){if(currentIndex>0){currentIndex--;updateVocabDisplay();}}
+        function shuffleWords(){currentIndex=Math.floor(Math.random()*currentWords.length);updateVocabDisplay();}
+        
+        function speakWord(){
+            const w = document.getElementById('vocabWord').textContent;
+            if('speechSynthesis' in window){
+                const u = new SpeechSynthesisUtterance(w);
+                u.lang='en-US'; u.rate=0.8; u.pitch=1;
+                speechSynthesis.speak(u);
+            } else {alert('您的浏览器不支持语音朗读功能');}
+        }
+        
+        // 跳跳乐游戏
+        let jState = {c:null,ctx:null,py:300,v:0,obs:[],s:0,go:true,fid:null,st:null};
+        const GY=300, G=0.6, JF=-12, PS=30, PX=100;
+        
+        function startJumpGame(){
+            showPage('jumpGamePage');
+            const c = document.getElementById('jumpCanvas');
+            c.width=500; c.height=400;
+            const ctx = c.getContext('2d');
+            if(jState.fid) cancelAnimationFrame(jState.fid);
+            if(jState.st) clearInterval(jState.st);
+            
+            jState = {c,ctx,py:GY,v:0,obs:[],s:0,go:false,fid:null,st:null,spd:5};
+            document.getElementById('jumpScore').textContent='0';
+            
+            const h = (e)=>{
+                if(e.type==='keydown' && e.key!==' ') return;
+                if(e.type==='keydown') e.preventDefault();
+                if(!jState.go && jState.py>=GY-2) jState.v=JF;
+                if(jState.go) startJumpGame();
+            };
+            document.addEventListener('keydown',h);
+            c.addEventListener('click',h);
+            c.addEventListener('touchstart',h);
+            
+            jState.st = setInterval(()=>{
+                if(!jState.go){
+                    const hh = 30+Math.random()*40;
+                    jState.obs.push({x:c.width, y:GY+50-hh, w:20+Math.random()*15, hh, p:false});
+                }
+            }, 1500+Math.random()*1000);
+            
+            jl();
+        }
+        
+        function jl(){
+            const s = jState;
+            if(!s.c||!s.ctx) return;
+            const ctx = s.ctx;
+            s.ctx.clearRect(0,0,s.c.width,s.c.height);
+            
+            const g = ctx.createLinearGradient(0,0,0,s.c.height);
+            g.addColorStop(0,'#87CEEB'); g.addColorStop(1,'#E0F7FA');
+            ctx.fillStyle=g; ctx.fillRect(0,0,s.c.width,s.c.height);
+            ctx.fillStyle='#8B5A2B'; ctx.fillRect(0,GY+50,s.c.width,s.c.height-GY-50);
+            ctx.fillStyle='#4CAF50'; ctx.fillRect(0,GY+45,s.c.width,10);
+            
+            if(!s.go){ s.v+=G; s.py+=s.v; if(s.py>GY){s.py=GY;s.v=0;} }
+            
+            ctx.fillStyle='#FF6B6B'; ctx.shadowColor='rgba(0,0,0,0.3)'; ctx.shadowBlur=10;
+            ctx.fillRect(PX,s.py,PS,PS); ctx.shadowBlur=0;
+            ctx.fillStyle='#FFF'; ctx.fillRect(PX+8,s.py+8,6,6); ctx.fillRect(PX+18,s.py+8,6,6);
+            ctx.fillStyle='#000'; ctx.fillRect(PX+10,s.py+10,3,4); ctx.fillRect(PX+20,s.py+10,3,4);
+            
+            for(let i=s.obs.length-1;i>=0;i--){
+                const o=s.obs[i];
+                if(!s.go){ o.x -= s.spd + s.s*0.1; }
+                ctx.fillStyle='#2E7D32'; ctx.fillRect(o.x,o.y,o.w,o.hh);
+                if(!s.go){
+                    if(PX<o.x+o.w && PX+PS>o.x && s.py<o.y+o.hh && s.py+PS>o.y){
+                        s.go=true; clearInterval(s.st);
+                    }
+                    if(!o.p && o.x+o.w<PX){ o.p=true; s.s++; document.getElementById('jumpScore').textContent=s.s; }
+                }
+                if(o.x<-50) s.obs.splice(i,1);
+            }
+            
+            ctx.fillStyle='#333'; ctx.font='bold 20px Arial'; ctx.fillText('得分: '+s.s,10,30);
+            
+            if(s.go){
+                ctx.fillStyle='rgba(0,0,0,0.6)'; ctx.fillRect(0,0,s.c.width,s.c.height);
+                ctx.fillStyle='#FFD700'; ctx.font='bold 40px Arial'; ctx.textAlign='center';
+                ctx.fillText('游戏结束',s.c.width/2,s.c.height/2-30);
+                ctx.fillStyle='#FFF'; ctx.font='20px Arial'; ctx.fillText('得分: '+s.s,s.c.width/2,s.c.height/2+20);
+                ctx.fillStyle='#4CAF50'; ctx.font='18px Arial'; ctx.fillText('点击或按空格重新开始',s.c.width/2,s.c.height/2+60);
+                ctx.textAlign='left';
+            }
+            s.fid = requestAnimationFrame(jl);
+        }
+    </script>
+	<style>
+	#gobangCanvas, #chessCanvas { display: block; margin: 0 auto; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,0,0,0.15); background: #fdf5e6; }
+	.game-container { margin: 15px 0; text-align: center; }
+	#gobangStatus, #chessStatus { font-size: 18px; min-height: 32px; padding: 8px 0; }
+	.game-controls button { margin: 5px; padding: 10px 25px; border: none; border-radius: 30px; font-size: 16px; cursor: pointer; background: #e67e22; color: #fff; transition: all 0.3s; }
+	.game-controls button:hover { background: #d35400; transform: scale(1.03); }
+	</style>
+	<style>
+	/* ===== 弹弹堂样式 ===== */
+	#bombCanvas { 
+	  display: block; 
+	  margin: 0 auto; 
+	  border-radius: 12px; 
+	  border: 2px solid #ff6600;
+	  background: #87CEEB; 
+	  cursor: crosshair;
+	}
+	
+	#bombPage .game-controls {
+	  display: flex;
+	  flex-wrap: wrap;
+	  justify-content: center;
+	  align-items: center;
+	  gap: 15px;
+	  padding: 15px 0;
+	}
+	
+	#bombPage .control-group {
+	  background: rgba(255,255,255,0.9);
+	  padding: 10px 20px;
+	  border-radius: 10px;
+	  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+	}
+	
+	#bombPage .control-group label {
+	  font-weight: bold;
+	  color: #333;
+	  margin-right: 10px;
+	}
+	
+	#bombPage .control-group input[type="range"] {
+	  width: 150px;
+	  accent-color: #ff6600;
+	}
+	
+	#bombPage .game-controls button {
+	  background: linear-gradient(135deg, #ff6600, #ff4500);
+	  color: #fff;
+	  font-size: 18px;
+	  padding: 12px 35px;
+	  border-radius: 25px;
+	  border: none;
+	  cursor: pointer;
+	  font-weight: bold;
+	  transition: transform 0.2s, box-shadow 0.2s;
+	  box-shadow: 0 4px 15px rgba(255,69,0,0.3);
+	}
+	
+	#bombPage .game-controls button:hover {
+	  transform: scale(1.05);
+	  box-shadow: 0 6px 20px rgba(255,69,0,0.5);
+	}
+	
+	#bombPage .game-controls button:last-child {
+	  background: linear-gradient(135deg, #666, #444);
+	  box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+	}
+	
+	#bombStatus {
+	  font-size: 20px;
+	  padding: 10px 0;
+	  color: #fff;
+	  background: rgba(0,0,0,0.3);
+	  border-radius: 12px;
+	  margin: 10px auto;
+	  max-width: 500px;
+	}
+	
+	.health-bar {
+	  display: inline-block;
+	  width: 100px;
+	  height: 12px;
+	  background: #333;
+	  border-radius: 6px;
+	  overflow: hidden;
+	  margin: 0 5px;
+	  vertical-align: middle;
+	}
+	
+	.health-fill {
+	  height: 100%;
+	  border-radius: 6px;
+	  transition: width 0.5s ease;
+	}
+	
+	.explosion-effect {
+	  position: absolute;
+	  pointer-events: none;
+	}
+	</style>
+	
+	<script>
+	// ================================
+	//  弹弹堂 - 完整游戏引擎
+	// ================================
+	
+	const bombCanvas = document.getElementById('bombCanvas');
+	const bombCtx = bombCanvas.getContext('2d');
+	const BOMB_W = 800, BOMB_H = 500;
+	
+	// 地形数据
+	let terrain = [];
+	const TERRAIN_COLOR = '#8B4513';
+	const GRASS_COLOR = '#228B22';
+	const SKY_COLORS = ['#1a237e', '#283593', '#3949ab', '#5c6bc0', '#7986cb', '#9fa8da'];
+	
+	// 玩家和AI
+	let player = { x: 100, y: 0, health: 100, name: '玩家', color: '#2196F3' };
+	let ai = { x: 0, y: 0, health: 100, name: 'AI', color: '#f44336' };
+	let currentTurn = 'player';
+	let gameOver = false;
+	
+	// 炮弹
+	let projectile = null;
+	let explosions = [];
+	let particles = [];
+	
+	// 风
+	let wind = 0;
+	
+	// 角度和力度
+	let angle = 45;
+	let power = 50;
+	
+	// === 生成地形 ===
+	function generateTerrain() {
+	  terrain = [];
+	  const points = 80;
+	  for (let i = 0; i <= points; i++) {
+	    const x = (i / points) * BOMB_W;
+	    let y;
+	    
+	    // 使用多种正弦波制造地形起伏
+	    y = BOMB_H * 0.6;
+	    y += Math.sin(i * 0.15) * 60;
+	    y += Math.sin(i * 0.4) * 30;
+	    y += Math.sin(i * 0.08) * 40;
+	    y += Math.random() * 10 - 5;
+	    
+	    // 确保两端平坦
+	    if (i < 3) y = BOMB_H * 0.6;
+	    if (i > points - 3) y = BOMB_H * 0.6;
+	    
+	    terrain.push({ x, y: Math.max(50, Math.min(BOMB_H - 20, y)) });
+	  }
+	}
+	
+	// === 获取地形高度 ===
+	function getTerrainHeight(x) {
+	  if (terrain.length < 2) return BOMB_H * 0.6;
+	  
+	  for (let i = 0; i < terrain.length - 1; i++) {
+	    if (x >= terrain[i].x && x <= terrain[i + 1].x) {
+	      const t = (x - terrain[i].x) / (terrain[i + 1].x - terrain[i].x);
+	      return terrain[i].y + t * (terrain[i + 1].y - terrain[i].y);
+	    }
+	  }
+	  return terrain[terrain.length - 1].y;
+	}
+	
+	// === 放置玩家和AI ===
+	function placePlayers() {
+	  // 玩家在左边
+	  player.x = 80;
+	  player.y = getTerrainHeight(player.x) - 30;
+	  player.health = 100;
+	  
+	  // AI在右边
+	  ai.x = BOMB_W - 120;
+	  ai.y = getTerrainHeight(ai.x) - 30;
+	  ai.health = 100;
+	  
+	  // 确保他们在同一水平面上
+	  if (Math.abs(player.y - ai.y) > 50) {
+	    generateTerrain();
+	    placePlayers();
+	  }
+	}
+	
+	// === 初始化游戏 ===
+	function bombInit() {
+	  generateTerrain();
+	  placePlayers();
+	  wind = (Math.random() - 0.5) * 0.5;
+	  currentTurn = 'player';
+	  gameOver = false;
+	  projectile = null;
+	  explosions = [];
+	  particles = [];
+	  
+	  document.getElementById('p1Health').textContent = player.health;
+	  document.getElementById('p2Health').textContent = ai.health;
+	  document.getElementById('bombTurn').textContent = '玩家';
+	  
+	  bombDraw();
+	}
+	
+	// === 绘制场景 ===
+	function bombDraw() {
+	  bombCtx.clearRect(0, 0, BOMB_W, BOMB_H);
+	  
+	  // 天空渐变
+	  const skyGrad = bombCtx.createLinearGradient(0, 0, 0, BOMB_H);
+	  skyGrad.addColorStop(0, '#1a237e');
+	  skyGrad.addColorStop(0.3, '#3949ab');
+	  skyGrad.addColorStop(0.6, '#64b5f6');
+	  skyGrad.addColorStop(1, '#87CEEB');
+	  bombCtx.fillStyle = skyGrad;
+	  bombCtx.fillRect(0, 0, BOMB_W, BOMB_H);
+	  
+	  // 云朵
+	  bombCtx.fillStyle = 'rgba(255,255,255,0.4)';
+	  for (let i = 0; i < 5; i++) {
+	    const cx = (i * 180 + 50) % BOMB_W;
+	    const cy = 40 + Math.sin(i * 1.5) * 20;
+	    bombCtx.beginPath();
+	    bombCtx.arc(cx, cy, 40, 0, Math.PI * 2);
+	    bombCtx.arc(cx + 30, cy - 10, 35, 0, Math.PI * 2);
+	    bombCtx.arc(cx + 60, cy, 30, 0, Math.PI * 2);
+	    bombCtx.fill();
+	  }
+	  
+	  // 地形
+	  bombCtx.beginPath();
+	  bombCtx.moveTo(0, BOMB_H);
+	  for (let i = 0; i < terrain.length; i++) {
+	    bombCtx.lineTo(terrain[i].x, terrain[i].y);
+	  }
+	  bombCtx.lineTo(BOMB_W, BOMB_H);
+	  bombCtx.closePath();
+	  
+	  // 地形填充
+	  const groundGrad = bombCtx.createLinearGradient(0, BOMB_H * 0.6, 0, BOMB_H);
+	  groundGrad.addColorStop(0, '#228B22');
+	  groundGrad.addColorStop(0.1, '#8B4513');
+	  groundGrad.addColorStop(0.5, '#654321');
+	  groundGrad.addColorStop(1, '#3e2723');
+	  bombCtx.fillStyle = groundGrad;
+	  bombCtx.fill();
+	  
+	  // 地形轮廓
+	  bombCtx.strokeStyle = '#4a2800';
+	  bombCtx.lineWidth = 2;
+	  bombCtx.stroke();
+	  
+	  // 草地细节
+	  for (let i = 0; i < terrain.length; i += 2) {
+	    bombCtx.fillStyle = '#2ecc71';
+	    for (let g = -3; g <= 3; g += 2) {
+	      bombCtx.fillRect(terrain[i].x + g, terrain[i].y - 5 - Math.random() * 5, 2, 5 + Math.random() * 5);
+	    }
+	  }
+	  
+	  // 绘制角色
+	  drawCharacter(player, 'left');
+	  drawCharacter(ai, 'right');
+	  
+	  // 绘制风
+	  bombCtx.fillStyle = 'rgba(255,255,255,0.7)';
+	  bombCtx.font = '16px Arial';
+	  bombCtx.textAlign = 'center';
+	  const windText = wind > 0 ? `→ 风 ${(wind * 100).toFixed(0)}%` : `← 风 ${(Math.abs(wind) * 100).toFixed(0)}%`;
+	  bombCtx.fillText(windText, BOMB_W / 2, 25);
+	  
+	  // 绘制风向标
+	  const windX = BOMB_W / 2;
+	  const windY = 40;
+	  bombCtx.strokeStyle = 'rgba(255,255,255,0.5)';
+	  bombCtx.lineWidth = 2;
+	  bombCtx.beginPath();
+	  bombCtx.moveTo(windX - wind * 80, windY);
+	  bombCtx.lineTo(windX + wind * 80, windY);
+	  bombCtx.stroke();
+	  
+	  // 绘制炮弹
+	  if (projectile) {
+	    bombCtx.fillStyle = '#FFD700';
+	    bombCtx.shadowBlur = 15;
+	    bombCtx.shadowColor = '#FFD700';
+	    bombCtx.beginPath();
+	    bombCtx.arc(projectile.x, projectile.y, 6, 0, Math.PI * 2);
+	    bombCtx.fill();
+	    bombCtx.shadowBlur = 0;
+	    
+	    // 炮弹尾迹
+	    if (projectile.trail && projectile.trail.length > 1) {
+	      bombCtx.strokeStyle = 'rgba(255,215,0,0.3)';
+	      bombCtx.lineWidth = 2;
+	      bombCtx.beginPath();
+	      for (let i = 0; i < projectile.trail.length; i++) {
+	        if (i === 0) bombCtx.moveTo(projectile.trail[i].x, projectile.trail[i].y);
+	        else bombCtx.lineTo(projectile.trail[i].x, projectile.trail[i].y);
+	      }
+	      bombCtx.stroke();
+	    }
+	  }
+	  
+	  // 绘制爆炸
+	  explosions.forEach((exp, index) => {
+	    const alpha = exp.life / exp.maxLife;
+	    const radius = exp.radius * (1 - alpha * 0.5);
+	    
+	    // 外圈
+	    bombCtx.beginPath();
+	    bombCtx.arc(exp.x, exp.y, radius, 0, Math.PI * 2);
+	    bombCtx.fillStyle = `rgba(255, ${200 * alpha}, 0, ${alpha * 0.6})`;
+	    bombCtx.fill();
+	    
+	    // 内圈
+	    bombCtx.beginPath();
+	    bombCtx.arc(exp.x, exp.y, radius * 0.6, 0, Math.PI * 2);
+	    bombCtx.fillStyle = `rgba(255, 255, 255, ${alpha * 0.5})`;
+	    bombCtx.fill();
+	    
+	    exp.life--;
+	    if (exp.life <= 0) explosions.splice(index, 1);
+	  });
+	  
+	  // 绘制粒子
+	  particles.forEach((p, index) => {
+	    p.x += p.vx;
+	    p.y += p.vy;
+	    p.vy += 0.3; // 重力
+	    p.life--;
+	    
+	    bombCtx.fillStyle = `rgba(255, ${200 - p.life * 2}, 0, ${p.life / 20})`;
+	    bombCtx.beginPath();
+	    bombCtx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+	    bombCtx.fill();
+	    
+	    if (p.life <= 0) particles.splice(index, 1);
+	  });
+	  
+	  // 血条
+	  drawHealthBar();
+	}
+	
+	// === 绘制角色 ===
+	function drawCharacter(char, direction) {
+	  const x = char.x;
+	  const y = char.y;
+	  
+	  // 身体
+	  bombCtx.fillStyle = char.color;
+	  bombCtx.beginPath();
+	  bombCtx.arc(x, y - 20, 15, 0, Math.PI * 2);
+	  bombCtx.fill();
+	  
+	  // 身体
+	  bombCtx.fillRect(x - 10, y - 5, 20, 25);
+	  
+	  // 腿
+	  bombCtx.fillStyle = '#333';
+	  bombCtx.fillRect(x - 8, y + 20, 6, 15);
+	  bombCtx.fillRect(x + 2, y + 20, 6, 15);
+	  
+	  // 眼睛
+	  bombCtx.fillStyle = '#fff';
+	  bombCtx.beginPath();
+	  bombCtx.arc(x - 5, y - 22, 4, 0, Math.PI * 2);
+	  bombCtx.arc(x + 5, y - 22, 4, 0, Math.PI * 2);
+	  bombCtx.fill();
+	  
+	  bombCtx.fillStyle = '#000';
+	  const eyeOffset = direction === 'left' ? 2 : -2;
+	  bombCtx.beginPath();
+	  bombCtx.arc(x - 5 + eyeOffset, y - 22, 2, 0, Math.PI * 2);
+	  bombCtx.arc(x + 5 + eyeOffset, y - 22, 2, 0, Math.PI * 2);
+	  bombCtx.fill();
+	  
+	  // 名字
+	  bombCtx.fillStyle = '#fff';
+	  bombCtx.font = '12px Arial';
+	  bombCtx.textAlign = 'center';
+	  bombCtx.fillText(char.name, x, y - 40);
+	  
+	  // 武器
+	  bombCtx.fillStyle = '#666';
+	  if (direction === 'left') {
+	    bombCtx.fillRect(x + 10, y - 5, 20, 4);
+	    bombCtx.fillRect(x + 25, y - 10, 4, 14);
+	  } else {
+	    bombCtx.fillRect(x - 30, y - 5, 20, 4);
+	    bombCtx.fillRect(x - 29, y - 10, 4, 14);
+	  }
+	}
+	
+	// === 绘制血条 ===
+	function drawHealthBar() {
+	  const barWidth = 200;
+	  const barHeight = 16;
+	  const barX = BOMB_W / 2 - barWidth / 2;
+	  const barY = 60;
+	  
+	  // 玩家血条
+	  bombCtx.fillStyle = 'rgba(0,0,0,0.5)';
+	  bombCtx.fillRect(barX - 110, barY, barWidth / 2, barHeight);
+	  const p1Percent = player.health / 100;
+	  const p1Color = p1Percent > 0.5 ? '#4CAF50' : p1Percent > 0.25 ? '#FFC107' : '#F44336';
+	  bombCtx.fillStyle = p1Color;
+	  bombCtx.fillRect(barX - 110, barY, (barWidth / 2) * p1Percent, barHeight);
+	  bombCtx.strokeStyle = '#fff';
+	  bombCtx.lineWidth = 1;
+	  bombCtx.strokeRect(barX - 110, barY, barWidth / 2, barHeight);
+	  
+	  // AI血条
+	  bombCtx.fillStyle = 'rgba(0,0,0,0.5)';
+	  bombCtx.fillRect(barX + 10, barY, barWidth / 2, barHeight);
+	  const p2Percent = ai.health / 100;
+	  const p2Color = p2Percent > 0.5 ? '#4CAF50' : p2Percent > 0.25 ? '#FFC107' : '#F44336';
+	  bombCtx.fillStyle = p2Color;
+	  bombCtx.fillRect(barX + 10, barY, (barWidth / 2) * p2Percent, barHeight);
+	  bombCtx.strokeStyle = '#fff';
+	  bombCtx.lineWidth = 1;
+	  bombCtx.strokeRect(barX + 10, barY, barWidth / 2, barHeight);
+	  
+	  // 标签
+	  bombCtx.fillStyle = '#fff';
+	  bombCtx.font = '14px Arial';
+	  bombCtx.textAlign = 'center';
+	  bombCtx.fillText('玩家', barX - 85, barY + 12);
+	  bombCtx.fillText('AI', barX + 85, barY + 12);
+	}
+	
+	// === 发射炮弹 ===
+	function bombFire() {
+	  if (gameOver) return;
+	  if (projectile) return;
+	  if (currentTurn !== 'player') return;
+	  
+	  const shooter = currentTurn === 'player' ? player : ai;
+	  const target = currentTurn === 'player' ? ai : player;
+	  
+	  // 计算发射方向
+	  const rad = (90 - angle) * Math.PI / 180;
+	  const vx = Math.cos(rad) * (power / 10);
+	  const vy = -Math.sin(rad) * (power / 10);
+	  
+	  projectile = {
+	    x: shooter.x + (currentTurn === 'player' ? 30 : -30),
+	    y: shooter.y - 20,
+	    vx: vx,
+	    vy: vy,
+	    trail: [],
+	    shooter: currentTurn,
+	  };
+	  
+	  // 清空拖尾
+	  projectile.trail = [];
+	}
+	
+	// === 更新炮弹 ===
+	function bombUpdateProjectile() {
+	  if (!projectile) return;
+	  
+	  // 保存轨迹
+	  projectile.trail.push({ x: projectile.x, y: projectile.y });
+	  if (projectile.trail.length > 20) projectile.trail.shift();
+	  
+	  // 物理更新
+	  projectile.x += projectile.vx;
+	  projectile.y += projectile.vy;
+	  projectile.vy += 0.15; // 重力
+	  projectile.vx += wind * 0.05; // 风力影响
+	  
+	  // 检查是否出界
+	  if (projectile.x < 0 || projectile.x > BOMB_W || projectile.y > BOMB_H) {
+	    bombExplode(projectile.x, projectile.y);
+	    projectile = null;
+	    bombEndTurn();
+	    return;
+	  }
+	  
+	  // 检查是否命中地形
+	  const terrainY = getTerrainHeight(projectile.x);
+	  if (projectile.y >= terrainY) {
+	    bombExplode(projectile.x, terrainY);
+	    bombCheckHit(projectile.x, projectile.y);
+	    projectile = null;
+	    bombEndTurn();
+	    return;
+	  }
+	  
+	  // 检查是否命中角色（简化碰撞检测）
+	  const targets = [player, ai];
+	  for (const target of targets) {
+	    const dx = projectile.x - target.x;
+	    const dy = projectile.y - (target.y - 20);
+	    const dist = Math.sqrt(dx * dx + dy * dy);
+	    if (dist < 30) {
+	      bombExplode(projectile.x, projectile.y);
+	      bombDamage(target, 20 + Math.random() * 15);
+	      projectile = null;
+	      bombEndTurn();
+	      return;
+	    }
+	  }
+	}
+	
+	// === 爆炸效果 ===
+	function bombExplode(x, y) {
+	  explosions.push({
+	    x: x,
+	    y: y,
+	    radius: 40,
+	    life: 30,
+	    maxLife: 30,
+	  });
+	  
+	  // 生成粒子
+	  for (let i = 0; i < 30; i++) {
+	    const angle2 = Math.random() * Math.PI * 2;
+	    const speed = 2 + Math.random() * 5;
+	    particles.push({
+	      x: x,
+	      y: y,
+	      vx: Math.cos(angle2) * speed,
+	      vy: Math.sin(angle2) * speed - 2,
+	      size: 2 + Math.random() * 4,
+	      life: 20 + Math.random() * 20,
+	    });
+	  }
+	  
+	  // 破坏地形
+	  const craterRadius = 25;
+	  for (let i = 0; i < terrain.length; i++) {
+	    const dx = terrain[i].x - x;
+	    const dy = terrain[i].y - y;
+	    const dist = Math.sqrt(dx * dx + dy * dy);
+	    if (dist < craterRadius) {
+	      terrain[i].y += (craterRadius - dist) * 0.8;
+	    }
+	  }
+	}
+	
+	// === 伤害计算 ===
+	function bombDamage(target, damage) {
+	  target.health -= damage;
+	  if (target.health < 0) target.health = 0;
+	  
+	  // 更新血条显示
+	  document.getElementById('p1Health').textContent = Math.round(player.health);
+	  document.getElementById('p2Health').textContent = Math.round(ai.health);
+	  
+	  // 爆炸粒子
+	  for (let i = 0; i < 15; i++) {
+	    const angle2 = Math.random() * Math.PI * 2;
+	    const speed = 1 + Math.random() * 3;
+	    particles.push({
+	      x: target.x,
+	      y: target.y - 20,
+	      vx: Math.cos(angle2) * speed,
+	      vy: Math.sin(angle2) * speed - 1,
+	      size: 2 + Math.random() * 3,
+	      life: 15 + Math.random() * 15,
+	      color: '#ff0000',
+	    });
+	  }
+	}
+	
+	// === 检查命中 ===
+	function bombCheckHit(x, y) {
+	  // 检查是否命中玩家
+	  const p1Dist = Math.sqrt((x - player.x) ** 2 + (y - (player.y - 20)) ** 2);
+	  const p2Dist = Math.sqrt((x - ai.x) ** 2 + (y - (ai.y - 20)) ** 2);
+	  
+	  if (p1Dist < 40) {
+	    bombDamage(player, 15 + Math.random() * 20);
+	  } else if (p2Dist < 40) {
+	    bombDamage(ai, 15 + Math.random() * 20);
+	  }
+	}
+	
+	// === 结束回合 ===
+	function bombEndTurn() {
+	  // 检查游戏结束
+	  if (player.health <= 0) {
+	    gameOver = true;
+	    document.getElementById('bombTurn').textContent = 'AI胜利！';
+	    bombDraw();
+	    return;
+	  }
+	  if (ai.health <= 0) {
+	    gameOver = true;
+	    document.getElementById('bombTurn').textContent = '玩家胜利！';
+	    bombDraw();
+	    return;
+	  }
+	  
+	  // 切换回合
+	  if (currentTurn === 'player') {
+	    currentTurn = 'ai';
+	    document.getElementById('bombTurn').textContent = 'AI思考中...';
+	    setTimeout(() => bombAITurn(), 1000);
+	  } else {
+	    currentTurn = 'player';
+	    document.getElementById('bombTurn').textContent = '你的回合';
+	  }
+	}
+	
+	// === AI决策 ===
+	function bombAITurn() {
+	  if (gameOver) return;
+	  
+	  // AI计算最佳角度和力度
+	  const dx = player.x - ai.x;
+	  const dy = (player.y - 20) - (ai.y - 20);
+	  const dist = Math.abs(dx);
+	  
+	  // 根据距离计算
+	  let aiAngle, aiPower;
+	  
+	  if (dist < 200) {
+	    aiAngle = 45 + Math.random() * 20;
+	    aiPower = 30 + Math.random() * 30;
+	  } else if (dist < 400) {
+	    aiAngle = 50 + Math.random() * 15;
+	    aiPower = 50 + Math.random() * 25;
+	  } else {
+	    aiAngle = 55 + Math.random() * 10;
+	    aiPower = 65 + Math.random() * 20;
+	  }
+	  
+	  // 加入随机误差
+	  aiAngle += Math.random() * 10 - 5;
+	  aiPower += Math.random() * 10 - 5;
+	  
+	  aiAngle = Math.max(10, Math.min(80, aiAngle));
+	  aiPower = Math.max(20, Math.min(90, aiPower));
+	  
+	  angle = aiAngle;
+	  power = aiPower;
+	  
+	  // 更新滑块
+	  document.getElementById('angleSlider').value = aiAngle;
+	  document.getElementById('powerSlider').value = aiPower;
+	  document.getElementById('angleDisplay').textContent = Math.round(aiAngle);
+	  document.getElementById('powerDisplay').textContent = Math.round(aiPower);
+	  
+	  // AI发射
+	  setTimeout(() => {
+	    const rad = (90 - aiAngle) * Math.PI / 180;
+	    const vx = Math.cos(rad) * (aiPower / 10);
+	    const vy = -Math.sin(rad) * (aiPower / 10);
+	    
+	    if (!gameOver) {
+	      projectile = {
+	        x: ai.x - 30,
+	        y: ai.y - 20,
+	        vx: -vx,
+	        vy: vy,
+	        trail: [],
+	        shooter: 'ai',
+	      };
+	      projectile.trail = [];
+	    }
+	  }, 500);
+	}
+	
+	// === 游戏主循环 ===
+	function bombGameLoop() {
+	  if (projectile) {
+	    bombUpdateProjectile();
+	  }
+	  bombDraw();
+	  requestAnimationFrame(bombGameLoop);
+	}
+	
+	// === 重置游戏 ===
+	function bombReset() {
+	  bombInit();
+	  document.getElementById('angleSlider').value = 45;
+	  document.getElementById('powerSlider').value = 50;
+	  document.getElementById('angleDisplay').textContent = '45';
+	  document.getElementById('powerDisplay').textContent = '50';
+	  currentTurn = 'player';
+	}
+	
+	// === 界面控制 ===
+	document.getElementById('angleSlider').addEventListener('input', function() {
+	  angle = parseInt(this.value);
+	  document.getElementById('angleDisplay').textContent = angle;
+	});
+	
+	document.getElementById('powerSlider').addEventListener('input', function() {
+	  power = parseInt(this.value);
+	  document.getElementById('powerDisplay').textContent = power;
+	});
+	
+	// === 键盘控制 ===
+	document.addEventListener('keydown', (e) => {
+	  if (e.key === 'ArrowUp') {
+	    angle = Math.min(90, angle + 1);
+	    document.getElementById('angleSlider').value = angle;
+	    document.getElementById('angleDisplay').textContent = angle;
+	  }
+	  if (e.key === 'ArrowDown') {
+	    angle = Math.max(0, angle - 1);
+	    document.getElementById('angleSlider').value = angle;
+	    document.getElementById('angleDisplay').textContent = angle;
+	  }
+	  if (e.key === 'ArrowLeft') {
+	    power = Math.max(10, power - 1);
+	    document.getElementById('powerSlider').value = power;
+	    document.getElementById('powerDisplay').textContent = power;
+	  }
+	  if (e.key === 'ArrowRight') {
+	    power = Math.min(100, power + 1);
+	    document.getElementById('powerSlider').value = power;
+	    document.getElementById('powerDisplay').textContent = power;
+	  }
+	  if (e.key === ' ' || e.key === 'Enter') {
+	    e.preventDefault();
+	    bombFire();
+	  }
+	});
+	
+	// === 启动游戏 ===
+	bombInit();
+	bombGameLoop();
+	
+	<script>
+	// ================================
+	//  五子棋 AI 完整逻辑
+	// ================================
+	const GB_SIZE = 15;
+	let gbBoard = Array(GB_SIZE).fill().map(() => Array(GB_SIZE).fill(0));
+	let gbTurn = 1; // 1:玩家(黑) 2:AI(白)
+	let gbOver = false;
+	let gbScoreMap = {}; // 简易AI学习记录
+	
+	function gbDraw() {
+	  const canvas = document.getElementById('gobangCanvas');
+	  const ctx = canvas.getContext('2d');
+	  ctx.clearRect(0,0,450,450);
+	  const sz = 450 / GB_SIZE;
+	  ctx.strokeStyle = '#8B4513';
+	  ctx.lineWidth = 1;
+	  for(let i=0;i<GB_SIZE;i++){
+	    ctx.beginPath();
+	    ctx.moveTo(sz/2 + i*sz, sz/2);
+	    ctx.lineTo(sz/2 + i*sz, 450 - sz/2);
+	    ctx.stroke();
+	    ctx.beginPath();
+	    ctx.moveTo(sz/2, sz/2 + i*sz);
+	    ctx.lineTo(450 - sz/2, sz/2 + i*sz);
+	    ctx.stroke();
+	  }
+	  [[3,3],[3,11],[7,7],[11,3],[11,11]].forEach(([x,y]) => {
+	    ctx.beginPath();
+	    ctx.arc(sz/2 + x*sz, sz/2 + y*sz, 3, 0, Math.PI*2);
+	    ctx.fillStyle = '#8B4513';
+	    ctx.fill();
+	  });
+	  for(let i=0;i<GB_SIZE;i++) for(let j=0;j<GB_SIZE;j++){
+	    if(gbBoard[i][j] === 0) continue;
+	    const cx = sz/2 + i*sz, cy = sz/2 + j*sz;
+	    const grad = ctx.createRadialGradient(cx-4, cy-4, 2, cx, cy, sz/2-2);
+	    if(gbBoard[i][j] === 1) {
+	      grad.addColorStop(0, '#555'); grad.addColorStop(1, '#111');
+	    } else {
+	      grad.addColorStop(0, '#fff'); grad.addColorStop(1, '#aaa');
+	    }
+	    ctx.beginPath();
+	    ctx.arc(cx, cy, sz/2-3, 0, Math.PI*2);
+	    ctx.fillStyle = grad;
+	    ctx.fill();
+	    ctx.strokeStyle = gbBoard[i][j] === 1 ? '#000' : '#666';
+	    ctx.lineWidth = 1;
+	    ctx.stroke();
+	  }
+	}
+	function gbCheckWin(x,y,player) {
+	  const dirs = [[1,0],[0,1],[1,1],[1,-1]];
+	  for(let [dx,dy] of dirs) {
+	    let cnt = 1;
+	    for(let step=1; step<5; step++) {
+	      const nx = x + dx*step, ny = y + dy*step;
+	      if(nx<0||nx>=GB_SIZE||ny<0||ny>=GB_SIZE||gbBoard[nx][ny]!==player) break;
+	      cnt++;
+	    }
+	    for(let step=1; step<5; step++) {
+	      const nx = x - dx*step, ny = y - dy*step;
+	      if(nx<0||nx>=GB_SIZE||ny<0||ny>=GB_SIZE||gbBoard[nx][ny]!==player) break;
+	      cnt++;
+	    }
+	    if(cnt >= 5) return true;
+	  }
+	  return false;
+	}
+	function gbEval(x,y,player) {
+	  let score = 0;
+	  const dirs = [[1,0],[0,1],[1,1],[1,-1]];
+	  for(let [dx,dy] of dirs) {
+	    let cnt = 1, open = 0;
+	    for(let step=1; step<=4; step++) {
+	      const nx = x + dx*step, ny = y + dy*step;
+	      if(nx<0||nx>=GB_SIZE||ny<0||ny>=GB_SIZE) break;
+	      if(gbBoard[nx][ny] === player) cnt++;
+	      else if(gbBoard[nx][ny] === 0) { open++; break; }
+	      else break;
+	    }
+	    for(let step=1; step<=4; step++) {
+	      const nx = x - dx*step, ny = y - dy*step;
+	      if(nx<0||nx>=GB_SIZE||ny<0||ny>=GB_SIZE) break;
+	      if(gbBoard[nx][ny] === player) cnt++;
+	      else if(gbBoard[nx][ny] === 0) { open++; break; }
+	      else break;
+	    }
+	    if(cnt >= 5) return 10000;
+	    if(cnt === 4 && open >= 1) score += 800;
+	    else if(cnt === 4) score += 300;
+	    else if(cnt === 3 && open >= 2) score += 200;
+	    else if(cnt === 3 && open >= 1) score += 80;
+	    else if(cnt === 2 && open >= 2) score += 20;
+	    score += cnt * 5;
+	  }
+	  return score;
+	}
+	function gbAI() {
+	  if(gbOver || gbTurn !== 2) return;
+	  let bestScore = -1, bestMove = null;
+	  for(let i=0;i<GB_SIZE;i++) for(let j=0;j<GB_SIZE;j++){
+	    if(gbBoard[i][j] !== 0) continue;
+	    gbBoard[i][j] = 2;
+	    let attack = gbEval(i,j,2);
+	    gbBoard[i][j] = 0;
+	    gbBoard[i][j] = 1;
+	    let defend = gbEval(i,j,1) * 0.9;
+	    gbBoard[i][j] = 0;
+	    let total = attack + defend;
+	    total += (7 - Math.abs(i-7)) + (7 - Math.abs(j-7));
+	    const key = `${i},${j}`;
+	    if(gbScoreMap[key]) total += gbScoreMap[key] * 0.1;
+	    if(total > bestScore) {
+	      bestScore = total;
+	      bestMove = [i,j];
+	    }
+	  }
+	  if(bestMove) {
+	    const [x,y] = bestMove;
+	    gbBoard[x][y] = 2;
+	    if(gbCheckWin(x,y,2)) {
+	      gbDraw();
+	      document.getElementById('gobangStatus').textContent = '🤖 AI 获胜！点击重新开始';
+	      gbOver = true;
+	      return;
+	    }
+	    gbTurn = 1;
+	    document.getElementById('gobangStatus').textContent = '轮到你走（黑棋）';
+	    gbDraw();
+	  }
+	}
+	document.getElementById('gobangCanvas').addEventListener('click', function(e) {
+	  if(gbOver || gbTurn !== 1) return;
+	  const rect = this.getBoundingClientRect();
+	  const mx = Math.floor(((e.clientX - rect.left) / rect.width) * 450 / (450/GB_SIZE));
+	  const my = Math.floor(((e.clientY - rect.top) / rect.height) * 450 / (450/GB_SIZE));
+	  if(mx<0||mx>=GB_SIZE||my<0||my>=GB_SIZE||gbBoard[mx][my]!==0) return;
+	  gbBoard[mx][my] = 1;
+	  if(gbCheckWin(mx,my,1)) {
+	    gbDraw();
+	    document.getElementById('gobangStatus').textContent = '🎉 你赢了！厉害！';
+	    gbOver = true;
+	    const key = `${mx},${my}`;
+	    gbScoreMap[key] = (gbScoreMap[key]||0) + 3;
+	    return;
+	  }
+	  gbTurn = 2;
+	  document.getElementById('gobangStatus').textContent = 'AI 思考中...';
+	  gbDraw();
+	  setTimeout(gbAI, 300);
+	});
+	function gobangRestart() {
+	  gbBoard = Array(GB_SIZE).fill().map(() => Array(GB_SIZE).fill(0));
+	  gbTurn = 1;
+	  gbOver = false;
+	  document.getElementById('gobangStatus').textContent = '你执黑先行，点击棋盘落子';
+	  gbDraw();
+	}
+	function gobangHint() {
+	  if(gbOver) return;
+	  let best = null, bestScore = -1;
+	  for(let i=0;i<GB_SIZE;i++) for(let j=0;j<GB_SIZE;j++){
+	    if(gbBoard[i][j] !== 0) continue;
+	    gbBoard[i][j] = 1;
+	    let score = gbEval(i,j,1);
+	    gbBoard[i][j] = 0;
+	    if(score > bestScore) { bestScore = score; best = [i,j]; }
+	  }
+	  if(best) {
+	    const sz = 450 / GB_SIZE;
+	    const cx = sz/2 + best[0]*sz, cy = sz/2 + best[1]*sz;
+	    const ctx = document.getElementById('gobangCanvas').getContext('2d');
+	    gbDraw();
+	    ctx.beginPath();
+	    ctx.arc(cx, cy, sz/2-1, 0, Math.PI*2);
+	    ctx.strokeStyle = '#FFD700';
+	    ctx.lineWidth = 4;
+	    ctx.setLineDash([6,4]);
+	    ctx.stroke();
+	    ctx.setLineDash([]);
+	    document.getElementById('gobangStatus').textContent = `💡 建议落子在这里`;
+	  }
+	}
+	// 初始化五子棋
+	gobangRestart();
+	
+	// ================================
+	//  中国象棋 AI 完整逻辑
+	// ================================
+	const CW = 480/9, CH = 540/10;
+	let chBoard = Array(10).fill().map(()=>Array(9).fill(0));
+	let chTurn = 1;
+	let chOver = false;
+	let chSelected = null;
+	let chValidMoves = [];
+	const PIECES = ['','车','马','相','仕','帅','炮','兵','车','马','象','士','将','炮','卒'];
+	
+	function chInit() {
+	  chBoard = Array(10).fill().map(()=>Array(9).fill(0));
+	  [[0,0,8],[0,1,9],[0,2,10],[0,3,11],[0,4,12],[0,5,11],[0,6,10],[0,7,9],[0,8,8],
+	   [2,1,14],[2,7,14],[3,0,15],[3,2,15],[3,4,15],[3,6,15],[3,8,15]].forEach(([y,x,v])=>chBoard[y][x]=v);
+	  [[9,0,1],[9,1,2],[9,2,3],[9,3,4],[9,4,5],[9,5,4],[9,6,3],[9,7,2],[9,8,1],
+	   [7,1,6],[7,7,6],[6,0,7],[6,2,7],[6,4,7],[6,6,7],[6,8,7]].forEach(([y,x,v])=>chBoard[y][x]=v);
+	  chTurn = 1;
+	  chOver = false;
+	  chSelected = null;
+	  chValidMoves = [];
+	  document.getElementById('chessStatus').textContent = '红方先行，点击棋子选中再点击目标位置';
+	}
+	
+	function chDraw() {
+	  const canvas = document.getElementById('chessCanvas');
+	  const ctx = canvas.getContext('2d');
+	  ctx.clearRect(0,0,480,540);
+	  ctx.fillStyle = '#DEB887';
+	  ctx.fillRect(0,0,480,540);
+	  ctx.strokeStyle = '#000';
+	  ctx.lineWidth = 1;
+	  for(let y=0;y<10;y++) {
+	    ctx.beginPath();
+	    ctx.moveTo(CW/2, CH/2 + y*CH);
+	    ctx.lineTo(8*CW + CW/2, CH/2 + y*CH);
+	    ctx.stroke();
+	  }
+	  for(let x=0;x<9;x++) {
+	    ctx.beginPath();
+	    ctx.moveTo(CW/2 + x*CW, CH/2);
+	    ctx.lineTo(CW/2 + x*CW, 9*CH + CH/2);
+	    ctx.stroke();
+	  }
+	  ctx.fillStyle = '#8B4513';
+	  ctx.font = 'bold 26px 楷体';
+	  ctx.textAlign = 'center';
+	  ctx.textBaseline = 'middle';
+	  ctx.fillText('楚  河          汉  界', 240, 4.5*CH);
+	  [[0,3],[7,3]].forEach(([y]) => {
+	    ctx.beginPath();
+	    ctx.moveTo(3*CW + CW/2, y*CH + CH/2);
+	    ctx.lineTo(5*CW + CW/2, (y+2)*CH + CH/2);
+	    ctx.stroke();
+	    ctx.beginPath();
+	    ctx.moveTo(5*CW + CW/2, y*CH + CH/2);
+	    ctx.lineTo(3*CW + CW/2, (y+2)*CH + CH/2);
+	    ctx.stroke();
+	  });
+	  for(let y=0;y<10;y++) for(let x=0;x<9;x++) {
+	    const v = chBoard[y][x];
+	    if(v === 0) continue;
+	    const cx = CW/2 + x*CW, cy = CH/2 + y*CH;
+	    if(chSelected && chSelected[0]===y && chSelected[1]===x) {
+	      ctx.beginPath();
+	      ctx.arc(cx,cy,24,0,Math.PI*2);
+	      ctx.fillStyle = '#FFD70080';
+	      ctx.fill();
+	    }
+	    if(chValidMoves.some(m => m[0]===y && m[1]===x)) {
+	      ctx.beginPath();
+	      ctx.arc(cx,cy,24,0,Math.PI*2);
+	      ctx.strokeStyle = '#00FF0080';
+	      ctx.lineWidth = 3;
+	      ctx.setLineDash([4,4]);
+	      ctx.stroke();
+	      ctx.setLineDash([]);
+	    }
+	    const grad = ctx.createRadialGradient(cx-4,cy-4,2,cx,cy,22);
+	    if(v < 8) { grad.addColorStop(0,'#FF6B6B'); grad.addColorStop(1,'#8B0000'); }
+	    else { grad.addColorStop(0,'#F5F5F5'); grad.addColorStop(1,'#888'); }
+	    ctx.beginPath();
+	    ctx.arc(cx,cy,22,0,Math.PI*2);
+	    ctx.fillStyle = grad;
+	    ctx.fill();
+	    ctx.strokeStyle = '#333';
+	    ctx.lineWidth = 1;
+	    ctx.stroke();
+	    ctx.font = 'bold 20px 楷体';
+	    ctx.textAlign = 'center';
+	    ctx.textBaseline = 'middle';
+	    ctx.fillStyle = v < 8 ? '#FFF' : '#000';
+	    ctx.fillText(PIECES[v], cx, cy);
+	  }
+	}
+	
+	function chGetMoves(y,x) {
+	  const v = chBoard[y][x];
+	  if(v === 0) return [];
+	  const isRed = v < 8;
+	  const moves = [];
+	  const inBoard = (ny,nx) => ny>=0 && ny<10 && nx>=0 && nx<9;
+	  const canMove = (ny,nx) => {
+	    if(!inBoard(ny,nx)) return false;
+	    const target = chBoard[ny][nx];
+	    if(target === 0) return true;
+	    if(isRed && target >= 8) return true;
+	    if(!isRed && target < 8 && target > 0) return true;
+	    return false;
+	  };
+	  switch(v) {
+	    case 1: case 8:
+	      for(let d of [[0,1],[0,-1],[1,0],[-1,0]]) {
+	        let ny=y+dy, nx=x+dx;
+	        while(inBoard(ny,nx) && chBoard[ny][nx]===0) { moves.push([ny,nx]); ny+=dy; nx+=dx; }
+	        if(inBoard(ny,nx) && canMove(ny,nx)) moves.push([ny,nx]);
+	      }
+	      break;
+	    case 2: case 9:
+	      [[-2,-1],[-2,1],[-1,-2],[-1,2],[1,-2],[1,2],[2,-1],[2,1]].forEach(([dy,dx]) => {
+	        const ny=y+dy, nx=x+dx;
+	        if(!inBoard(ny,nx) || !canMove(ny,nx)) return;
+	        const legY = y + Math.floor(dy/2), legX = x + Math.floor(dx/2);
+	        if(chBoard[legY][legX] !== 0) return;
+	        moves.push([ny,nx]);
+	      });
+	      break;
+	    case 3: case 10:
+	      [[-2,-2],[-2,2],[2,-2],[2,2]].forEach(([dy,dx]) => {
+	        const ny=y+dy, nx=x+dx;
+	        if(!inBoard(ny,nx) || !canMove(ny,nx)) return;
+	        if(isRed && ny < 5) return;
+	        if(!isRed && ny > 4) return;
+	        if(chBoard[y+dy/2][x+dx/2] !== 0) return;
+	        moves.push([ny,nx]);
+	      });
+	      break;
+	    case 4: case 11:
+	      [[-1,-1],[-1,1],[1,-1],[1,1]].forEach(([dy,dx]) => {
+	        const ny=y+dy, nx=x+dx;
+	        if(!inBoard(ny,nx) || !canMove(ny,nx)) return;
+	        if(isRed && (ny<7 || ny>9 || nx<3 || nx>5)) return;
+	        if(!isRed && (ny<0 || ny>2 || nx<3 || nx>5)) return;
+	        moves.push([ny,nx]);
+	      });
+	      break;
+	    case 5: case 12:
+	      [[0,1],[0,-1],[1,0],[-1,0]].forEach(([dy,dx]) => {
+	        const ny=y+dy, nx=x+dx;
+	        if(!inBoard(ny,nx) || !canMove(ny,nx)) return;
+	        if(isRed && (ny<7 || ny>9 || nx<3 || nx>5)) return;
+	        if(!isRed && (ny<0 || ny>2 || nx<3 || nx>5)) return;
+	        moves.push([ny,nx]);
+	      });
+	      break;
+	    case 6: case 13:
+	      for(let d of [[0,1],[0,-1],[1,0],[-1,0]]) {
+	        let ny=y+dy, nx=x+dx;
+	        while(inBoard(ny,nx) && chBoard[ny][nx]===0) { moves.push([ny,nx]); ny+=dy; nx+=dx; }
+	        if(inBoard(ny,nx)) {
+	          const target = chBoard[ny][nx];
+	          if(target !== 0) {
+	            ny+=dy; nx+=dx;
+	            while(inBoard(ny,nx) && chBoard[ny][nx]===0) { ny+=dy; nx+=dx; }
+	            if(inBoard(ny,nx) && canMove(ny,nx)) moves.push([ny,nx]);
+	          }
+	        }
+	      }
+	      break;
+	    case 7: case 14:
+	      if(isRed) {
+	        if(y === 5) {
+	          if(canMove(y-1,x)) moves.push([y-1,x]);
+	          if(canMove(y,x-1)) moves.push([y,x-1]);
+	          if(canMove(y,x+1)) moves.push([y,x+1]);
+	        } else {
+	          if(canMove(y-1,x)) moves.push([y-1,x]);
+	        }
+	      } else {
+	        if(y === 4) {
+	          if(canMove(y+1,x)) moves.push([y+1,x]);
+	          if(canMove(y,x-1)) moves.push([y,x-1]);
+	          if(canMove(y,x+1)) moves.push([y,x+1]);
+	        } else {
+	          if(canMove(y+1,x)) moves.push([y+1,x]);
+	        }
+	      }
+	      break;
+	  }
+	  return moves;
+	}
+	
+	function chEval() {
+	  const values = {1:900,2:400,3:200,4:200,5:99999,6:450,7:100,8:900,9:400,10:200,11:200,12:99999,13:450,14:100};
+	  let score = 0;
+	  for(let y=0;y<10;y++) for(let x=0;x<9;x++) {
+	    const v = chBoard[y][x];
+	    if(v === 0) continue;
+	    const val = values[v] || 0;
+	    if(v < 8) score += val;
+	    else score -= val;
+	  }
+	  return score;
+	}
+	
+	function chAI() {
+	  if(chOver || chTurn !== 2) return;
+	  let bestScore = -Infinity, bestMove = null;
+	  const moves = [];
+	  for(let y=0;y<10;y++) for(let x=0;x<9;x++) {
+	    if(chBoard[y][x] >= 8 && chBoard[y][x] <= 14) {
+	      const ms = chGetMoves(y,x);
+	      ms.forEach(m => moves.push({from:[y,x], to:m}));
+	    }
+	  }
+	  for(let m of moves) {
+	    const [fy,fx] = m.from, [ty,tx] = m.to;
+	    const captured = chBoard[ty][tx];
+	    chBoard[ty][tx] = chBoard[fy][fx];
+	    chBoard[fy][fx] = 0;
+	    let score = chEval() + Math.random() * 20;
+	    chBoard[fy][fx] = chBoard[ty][tx];
+	    chBoard[ty][tx] = captured;
+	    if(score > bestScore) {
+	      bestScore = score;
+	      bestMove = m;
+	    }
+	  }
+	  if(bestMove) {
+	    const [fy,fx] = bestMove.from, [ty,tx] = bestMove.to;
+	    chBoard[ty][tx] = chBoard[fy][fx];
+	    chBoard[fy][fx] = 0;
+	    if(chBoard[ty][tx] === 12) {
+	      chDraw();
+	      document.getElementById('chessStatus').textContent = '♚ AI 获胜！';
+	      chOver = true;
+	      return;
+	    }
+	    chTurn = 1;
+	    chSelected = null;
+	    chValidMoves = [];
+	    document.getElementById('chessStatus').textContent = '轮到你走（红方）';
+	    chDraw();
+	  }
+	}
+	
+	document.getElementById('chessCanvas').addEventListener('click', function(e) {
+	  if(chOver || chTurn !== 1) return;
+	  const rect = this.getBoundingClientRect();
+	  const mx = Math.floor(((e.clientX - rect.left) / rect.width) * 480 / CW);
+	  const my = Math.floor(((e.clientY - rect.top) / rect.height) * 540 / CH);
+	  if(mx<0||mx>=9||my<0||my>=10) return;
+	  if(chSelected) {
+	    const hit = chValidMoves.some(m => m[0]===my && m[1]===mx);
+	    if(hit) {
+	      const [sy,sx] = chSelected;
+	      chBoard[my][mx] = chBoard[sy][sx];
+	      chBoard[sy][sx] = 0;
+	      if(chBoard[my][mx] === 12) {
+	        chDraw();
+	        document.getElementById('chessStatus').textContent = '🎉 你赢了！';
+	        chOver = true;
+	        return;
+	      }
+	      chTurn = 2;
+	      chSelected = null;
+	      chValidMoves = [];
+	      document.getElementById('chessStatus').textContent = 'AI 思考中...';
+	      chDraw();
+	      setTimeout(chAI, 600);
+	      return;
+	    }
+	  }
+	  if(chBoard[my][mx] >= 1 && chBoard[my][mx] <= 7) {
+	    chSelected = [my, mx];
+	    chValidMoves = chGetMoves(my, mx);
+	    chDraw();
+	  } else {
+	    chSelected = null;
+	    chValidMoves = [];
+	    chDraw();
+	  }
+	});
+	
+	function chessRestart() { chInit(); chDraw(); }
+	function chessHint() {
+	  if(chOver) return;
+	  let best = null, bestScore = -1;
+	  for(let y=0;y<10;y++) for(let x=0;x<9;x++) {
+	    if(chBoard[y][x] >= 1 && chBoard[y][x] <= 7) {
+	      const ms = chGetMoves(y,x);
+	      for(let m of ms) {
+	        const [fy,fx] = [y,x], [ty,tx] = m;
+	        const captured = chBoard[ty][tx];
+	        chBoard[ty][tx] = chBoard[fy][fx];
+	        chBoard[fy][fx] = 0;
+	        let score = chEval();
+	        chBoard[fy][fx] = chBoard[ty][tx];
+	        chBoard[ty][tx] = captured;
+	        if(score > bestScore) { bestScore = score; best = {from:[y,x], to:m}; }
+	      }
+	    }
+	  }
+	  if(best) {
+	    document.getElementById('chessStatus').textContent = `💡 建议走 ${PIECES[chBoard[best.from[0]][best.from[1]]]} 到目标位置`;
+	    const ctx = document.getElementById('chessCanvas').getContext('2d');
+	    chDraw();
+	    ctx.strokeStyle = '#FFD700';
+	    ctx.lineWidth = 3;
+	    ctx.setLineDash([6,4]);
+	    const fx = CW/2 + best.from[1]*CW, fy = CH/2 + best.from[0]*CH;
+	    const tx = CW/2 + best.to[1]*CW, ty = CH/2 + best.to[0]*CH;
+	    ctx.beginPath();
+	    ctx.arc(fx, fy, 24, 0, Math.PI*2);
+	    ctx.stroke();
+	    ctx.beginPath();
+	    ctx.arc(tx, ty, 24, 0, Math.PI*2);
+	    ctx.stroke();
+	    ctx.setLineDash([]);
+	  }
+	}
+	// 初始化象棋
+	chInit();
+	chDraw();
+	</script>
+	<style>
+	#plGameCanvas { 
+	  display: block; 
+	  margin: 0 auto; 
+	  border-radius: 12px; 
+	  border: 2px solid #00d4ff;
+	  background: #000; 
+	}
+	#plStatus { font-size: 18px; padding: 10px 0; color: #fff; }
+	.pl-hint { color: #888; font-size: 14px; margin-top: 8px; }
+	#planeWarPage .game-controls button { 
+	  background: #00d4ff; 
+	  color: #000; 
+	}
+	#planeWarPage .game-controls button:hover { 
+	  background: #00b8e6; 
+	}
+	</style>
+	
+	<script>
+	// ================================
+	//  飞机大战 完整游戏逻辑
+	// ================================
+	
+	const plCanvas = document.getElementById('plGameCanvas');
+	const plCtx = plCanvas.getContext('2d');
+	const plW = 600, plH = 700;
+	
+	// 游戏状态
+	let plRunning = false;
+	let plPaused = false;
+	let plScore = 0;
+	let plLives = 3;
+	let plKills = 0;
+	let plFrame = 0;
+	let plSpawnCounter = 0;
+	
+	// 玩家飞机
+	const plPlayer = {
+	  x: plW/2 - 25,
+	  y: plH - 100,
+	  w: 50,
+	  h: 60,
+	  speed: 6,
+	  shootCD: 0,
+	  invincible: 0,
+	};
+	
+	// 对象数组
+	let plBullets = [];
+	let plEnemies = [];
+	let plExplosions = [];
+	let plPowerups = [];
+	let plEnemyBullets = [];
+	
+	// 键盘控制
+	const plKeys = { left: false, right: false };
+	
+	// === 绘制玩家 ===
+	function plDrawPlayer() {
+	  const p = plPlayer;
+	  if (p.invincible > 0 && Math.floor(p.invincible / 5) % 2 === 0) return;
+	  
+	  // 机身
+	  plCtx.fillStyle = '#00d4ff';
+	  plCtx.beginPath();
+	  plCtx.moveTo(p.x + p.w/2, p.y);
+	  plCtx.lineTo(p.x + 5, p.y + p.h);
+	  plCtx.lineTo(p.x + p.w - 5, p.y + p.h);
+	  plCtx.closePath();
+	  plCtx.fill();
+	  
+	  // 机翼
+	  plCtx.fillStyle = '#0088cc';
+	  plCtx.fillRect(p.x - 8, p.y + p.h - 30, p.w + 16, 10);
+	  plCtx.fillRect(p.x + 5, p.y + p.h - 45, p.w - 10, 8);
+	  
+	  // 座舱
+	  plCtx.fillStyle = '#66eeff';
+	  plCtx.beginPath();
+	  plCtx.arc(p.x + p.w/2, p.y + 20, 12, 0, Math.PI, false);
+	  plCtx.fill();
+	  
+	  // 引擎火焰
+	  if (plFrame % 3 === 0) {
+	    plCtx.fillStyle = '#ff6600';
+	    plCtx.beginPath();
+	    plCtx.moveTo(p.x + 15, p.y + p.h);
+	    plCtx.lineTo(p.x + p.w/2, p.y + p.h + 15 + Math.random() * 10);
+	    plCtx.lineTo(p.x + p.w - 15, p.y + p.h);
+	    plCtx.closePath();
+	    plCtx.fill();
+	  }
+	}
+	
+	// === 绘制敌人 ===
+	function plDrawEnemy(e) {
+	  const color = e.hp === 1 ? '#ff4444' : '#ff8800';
+	  
+	  plCtx.fillStyle = color;
+	  plCtx.beginPath();
+	  plCtx.moveTo(e.x + e.w/2, e.y + e.h);
+	  plCtx.lineTo(e.x, e.y + 5);
+	  plCtx.lineTo(e.x + e.w, e.y + 5);
+	  plCtx.closePath();
+	  plCtx.fill();
+	  
+	  plCtx.fillStyle = '#cc0000';
+	  plCtx.fillRect(e.x - 5, e.y + 10, e.w + 10, 8);
+	  
+	  plCtx.fillStyle = '#000';
+	  plCtx.beginPath();
+	  plCtx.arc(e.x + 12, e.y + 20, 4, 0, Math.PI*2);
+	  plCtx.arc(e.x + e.w - 12, e.y + 20, 4, 0, Math.PI*2);
+	  plCtx.fill();
+	  
+	  if (e.hp > 1) {
+	    plCtx.fillStyle = '#333';
+	    plCtx.fillRect(e.x, e.y - 8, e.w, 5);
+	    plCtx.fillStyle = '#0f0';
+	    plCtx.fillRect(e.x, e.y - 8, e.w * (e.hp / 3), 5);
+	  }
+	}
+	
+	// === 绘制子弹 ===
+	function plDrawBullet(b) {
+	  plCtx.fillStyle = b.isEnemy ? '#ff6600' : '#00ff88';
+	  plCtx.shadowBlur = 10;
+	  plCtx.shadowColor = b.isEnemy ? '#ff6600' : '#00ff88';
+	  plCtx.fillRect(b.x - 2, b.y - 8, 4, 16);
+	  plCtx.shadowBlur = 0;
+	}
+	
+	// === 绘制爆炸 ===
+	function plDrawExplosion(ex) {
+	  const alpha = ex.life / 30;
+	  plCtx.beginPath();
+	  plCtx.arc(ex.x, ex.y, ex.radius * (1 - alpha), 0, Math.PI*2);
+	  plCtx.fillStyle = `rgba(255, ${255 * alpha}, 0, ${alpha})`;
+	  plCtx.fill();
+	  plCtx.beginPath();
+	  plCtx.arc(ex.x, ex.y, ex.radius * 0.6 * (1 - alpha), 0, Math.PI*2);
+	  plCtx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+	  plCtx.fill();
+	}
+	
+	// === 绘制道具 ===
+	function plDrawPowerup(p) {
+	  plCtx.fillStyle = '#ffd700';
+	  plCtx.beginPath();
+	  plCtx.arc(p.x, p.y, 10, 0, Math.PI*2);
+	  plCtx.fill();
+	  plCtx.fillStyle = '#fff';
+	  plCtx.font = 'bold 16px Arial';
+	  plCtx.textAlign = 'center';
+	  plCtx.textBaseline = 'middle';
+	  plCtx.fillText('❤', p.x, p.y);
+	}
+	
+	// === 生成敌人 ===
+	function plSpawnEnemy() {
+	  const isElite = Math.random() < 0.15 && plScore > 10;
+	  const hp = isElite ? 3 : 1;
+	  const w = isElite ? 60 : 40;
+	  const h = isElite ? 55 : 40;
+	  
+	  plEnemies.push({
+	    x: Math.random() * (plW - w),
+	    y: -h,
+	    w: w,
+	    h: h,
+	    hp: hp,
+	    speed: isElite ? 1 : 1.5 + Math.random() * 1.5,
+	    dir: Math.random() < 0.5 ? 1 : -1,
+	    shootTimer: 0,
+	    moveTimer: 0,
+	  });
+	}
+	
+	// === 敌人射击 ===
+	function plEnemyShoot(e) {
+	  plEnemyBullets.push({
+	    x: e.x + e.w/2,
+	    y: e.y + e.h,
+	    speed: 4 + Math.random() * 2,
+	    isEnemy: true,
+	  });
+	}
+	
+	// === 更新游戏 ===
+	function plUpdate() {
+	  if (!plRunning || plPaused) return;
+	  
+	  plFrame++;
+	  plSpawnCounter++;
+	  
+	  // 生成敌人
+	  const spawnRate = Math.max(10, 60 - Math.floor(plScore / 10) * 2);
+	  if (plSpawnCounter > spawnRate) {
+	    plSpawnEnemy();
+	    plSpawnCounter = 0;
+	  }
+	  
+	  // 玩家移动
+	  if (plKeys.left) plPlayer.x -= plPlayer.speed;
+	  if (plKeys.right) plPlayer.x += plPlayer.speed;
+	  plPlayer.x = Math.max(0, Math.min(plW - plPlayer.w, plPlayer.x));
+	  
+	  if (plPlayer.invincible > 0) plPlayer.invincible--;
+	  
+	  // 自动射击
+	  if (plPlayer.shootCD <= 0) {
+	    plBullets.push({
+	      x: plPlayer.x + plPlayer.w/2,
+	      y: plPlayer.y,
+	      speed: 10,
+	      isEnemy: false,
+	    });
+	    plPlayer.shootCD = 8;
+	  } else {
+	    plPlayer.shootCD--;
+	  }
+	  
+	  // 更新子弹
+	  plBullets.forEach(b => b.y -= b.speed);
+	  plBullets = plBullets.filter(b => b.y > -20);
+	  
+	  plEnemyBullets.forEach(b => b.y += b.speed);
+	  plEnemyBullets = plEnemyBullets.filter(b => b.y < plH + 20);
+	  
+	  // 更新敌人
+	  plEnemies.forEach(e => {
+	    e.y += e.speed;
+	    e.moveTimer++;
+	    
+	    if (e.moveTimer > 30) {
+	      e.dir = Math.random() < 0.5 ? 1 : -1;
+	      e.moveTimer = 0;
+	    }
+	    e.x += e.dir * 0.5;
+	    e.x = Math.max(0, Math.min(plW - e.w, e.x));
+	    
+	    e.shootTimer++;
+	    if (e.shootTimer > 80 - Math.min(30, Math.floor(plScore / 5))) {
+	      plEnemyShoot(e);
+	      e.shootTimer = 0;
+	    }
+	  });
+	  plEnemies = plEnemies.filter(e => e.y < plH + 50);
+	  
+	  // 更新道具
+	  plPowerups.forEach(p => p.y += 2);
+	  plPowerups = plPowerups.filter(p => p.y < plH);
+	  
+	  // ===== 碰撞检测 =====
+	  
+	  // 玩家子弹 vs 敌人
+	  for (let i = plBullets.length - 1; i >= 0; i--) {
+	    const b = plBullets[i];
+	    for (let j = plEnemies.length - 1; j >= 0; j--) {
+	      const e = plEnemies[j];
+	      if (b.x > e.x && b.x < e.x + e.w && b.y > e.y && b.y < e.y + e.h) {
+	        e.hp--;
+	        plBullets.splice(i, 1);
+	        
+	        if (e.hp <= 0) {
+	          plScore += e.w > 50 ? 30 : 10;
+	          plKills++;
+	          document.getElementById('plScore').textContent = plScore;
+	          document.getElementById('plKills').textContent = plKills;
+	          
+	          plExplosions.push({
+	            x: e.x + e.w/2,
+	            y: e.y + e.h/2,
+	            radius: 30,
+	            life: 30,
+	          });
+	          
+	          if (Math.random() < 0.1 && plLives < 5) {
+	            plPowerups.push({
+	              x: e.x + e.w/2,
+	              y: e.y + e.h,
+	            });
+	          }
+	          
+	          plEnemies.splice(j, 1);
+	        }
+	        break;
+	      }
+	    }
+	  }
+	  
+	  // 敌人子弹 vs 玩家
+	  for (let i = plEnemyBullets.length - 1; i >= 0; i--) {
+	    const b = plEnemyBullets[i];
+	    if (plPlayer.invincible <= 0 &&
+	        b.x > plPlayer.x && b.x < plPlayer.x + plPlayer.w &&
+	        b.y > plPlayer.y && b.y < plPlayer.y + plPlayer.h) {
+	      plEnemyBullets.splice(i, 1);
+	      plPlayerHit();
+	    }
+	  }
+	  
+	  // 敌人 vs 玩家
+	  for (let i = plEnemies.length - 1; i >= 0; i--) {
+	    const e = plEnemies[i];
+	    if (plPlayer.invincible <= 0 &&
+	        e.x < plPlayer.x + plPlayer.w &&
+	        e.x + e.w > plPlayer.x &&
+	        e.y < plPlayer.y + plPlayer.h &&
+	        e.y + e.h > plPlayer.y) {
+	      plEnemies.splice(i, 1);
+	      plPlayerHit();
+	      
+	      plExplosions.push({
+	        x: e.x + e.w/2,
+	        y: e.y + e.h/2,
+	        radius: 40,
+	        life: 40,
+	      });
+	    }
+	  }
+	  
+	  // 道具 vs 玩家
+	  for (let i = plPowerups.length - 1; i >= 0; i--) {
+	    const p = plPowerups[i];
+	    if (p.x > plPlayer.x && p.x < plPlayer.x + plPlayer.w &&
+	        p.y > plPlayer.y && p.y < plPlayer.y + plPlayer.h) {
+	      plPowerups.splice(i, 1);
+	      plLives = Math.min(5, plLives + 1);
+	      document.getElementById('plLife').textContent = plLives;
+	    }
+	  }
+	  
+	  // 更新爆炸
+	  plExplosions.forEach(ex => ex.life--);
+	  plExplosions = plExplosions.filter(ex => ex.life > 0);
+	}
+	
+	// === 玩家被击中 ===
+	function plPlayerHit() {
+	  plLives--;
+	  document.getElementById('plLife').textContent = plLives;
+	  plPlayer.invincible = 60;
+	  
+	  plExplosions.push({
+	    x: plPlayer.x + plPlayer.w/2,
+	    y: plPlayer.y + plPlayer.h/2,
+	    radius: 40,
+	    life: 30,
+	  });
+	  
+	  if (plLives <= 0) {
+	    plGameOver();
+	  }
+	}
+	
+	// === 游戏结束 ===
+	function plGameOver() {
+	  plRunning = false;
+	  
+	  plCtx.fillStyle = 'rgba(0,0,0,0.7)';
+	  plCtx.fillRect(0, 0, plW, plH);
+	  plCtx.fillStyle = '#ff4444';
+	  plCtx.font = 'bold 60px Arial';
+	  plCtx.textAlign = 'center';
+	  plCtx.textBaseline = 'middle';
+	  plCtx.fillText('游戏结束', plW/2, plH/2 - 30);
+	  plCtx.fillStyle = '#ffd700';
+	  plCtx.font = '30px Arial';
+	  plCtx.fillText(`最终得分: ${plScore}`, plW/2, plH/2 + 40);
+	}
+	
+	// === 绘制 ===
+	function plDraw() {
+	  plCtx.clearRect(0, 0, plW, plH);
+	  
+	  // 星空背景
+	  for (let i = 0; i < 50; i++) {
+	    const star = {
+	      x: (i * 137.5 + plFrame * 0.2) % plW,
+	      y: (i * 97.3 + plFrame * 0.5) % plH,
+	      size: Math.random() * 2 + 1,
+	      alpha: Math.random() * 0.5 + 0.3,
+	    };
+	    plCtx.fillStyle = `rgba(255, 255, 255, ${star.alpha})`;
+	    plCtx.beginPath();
+	    plCtx.arc(star.x, star.y, star.size, 0, Math.PI*2);
+	    plCtx.fill();
+	  }
+	  
+	  // 玩家
+	  plDrawPlayer();
+	  
+	  // 子弹
+	  plBullets.forEach(plDrawBullet);
+	  plEnemyBullets.forEach(plDrawBullet);
+	  
+	  // 敌人
+	  plEnemies.forEach(plDrawEnemy);
+	  
+	  // 爆炸
+	  plExplosions.forEach(plDrawExplosion);
+	  
+	  // 道具
+	  plPowerups.forEach(plDrawPowerup);
+	}
+	
+	// === 游戏循环 ===
+	function plGameLoop() {
+	  plUpdate();
+	  plDraw();
+	  requestAnimationFrame(plGameLoop);
+	}
+	
+	// === 控制函数 ===
+	function plStartOrPause() {
+	  const btn = document.querySelector('#planeWarPage .game-controls button:first-child');
+	  
+	  if (!plRunning) {
+	    if (plLives <= 0) plReset();
+	    plRunning = true;
+	    plPaused = false;
+	    btn.textContent = '⏸️ 暂停';
+	  } else if (plPaused) {
+	    plPaused = false;
+	    btn.textContent = '⏸️ 暂停';
+	  } else {
+	    plPaused = true;
+	    btn.textContent = '▶️ 继续';
+	    
+	    plCtx.fillStyle = 'rgba(0,0,0,0.5)';
+	    plCtx.fillRect(0, 0, plW, plH);
+	    plCtx.fillStyle = '#fff';
+	    plCtx.font = '40px Arial';
+	    plCtx.textAlign = 'center';
+	    plCtx.textBaseline = 'middle';
+	    plCtx.fillText('已暂停', plW/2, plH/2);
+	  }
+	}
+	
+	function plReset() {
+	  plRunning = false;
+	  plPaused = false;
+	  plScore = 0;
+	  plLives = 3;
+	  plKills = 0;
+	  plFrame = 0;
+	  plSpawnCounter = 0;
+	  
+	  plPlayer.x = plW/2 - 25;
+	  plPlayer.invincible = 0;
+	  
+	  plBullets = [];
+	  plEnemies = [];
+	  plExplosions = [];
+	  plPowerups = [];
+	  plEnemyBullets = [];
+	  
+	  document.getElementById('plScore').textContent = '0';
+	  document.getElementById('plLife').textContent = '3';
+	  document.getElementById('plKills').textContent = '0';
+	  
+	  const btn = document.querySelector('#planeWarPage .game-controls button:first-child');
+	  btn.textContent = '🚀 开始/暂停';
+	}
+	
+	// === 键盘控制 ===
+	document.addEventListener('keydown', (e) => {
+	  if (e.key === 'ArrowLeft') plKeys.left = true;
+	  if (e.key === 'ArrowRight') plKeys.right = true;
+	  if (e.key === ' ') {
+	    e.preventDefault();
+	    plStartOrPause();
+	  }
+	});
+	
+	document.addEventListener('keyup', (e) => {
+	  if (e.key === 'ArrowLeft') plKeys.left = false;
+	  if (e.key === 'ArrowRight') plKeys.right = false;
+	});
+	
+	// === 启动游戏循环 ===
+	plReset();
+	plGameLoop();
+	</script>
+	<style>
+	/* ===== 拼音和发音页面专属样式 ===== */
+	#pinyinPage, #phoneticsPage {
+	  overflow-y: auto;
+	  max-height: 90vh;
+	  padding: 10px 5px;
+	}
+	
+	.section-card {
+	  background: #fff;
+	  border-radius: 16px;
+	  padding: 20px;
+	  margin: 15px 0;
+	  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+	}
+	
+	.section-card h3 {
+	  color: #2c3e50;
+	  margin-bottom: 15px;
+	  font-size: 20px;
+	  border-bottom: 3px solid #e74c3c;
+	  padding-bottom: 8px;
+	  display: inline-block;
+	}
+	
+	/* 规则网格 */
+	.rule-grid {
+	  display: grid;
+	  grid-template-columns: repeat(2, 1fr);
+	  gap: 12px;
+	}
+	
+	.rule-item {
+	  background: #f8f9fa;
+	  border: 2px solid #e9ecef;
+	  border-radius: 12px;
+	  padding: 15px;
+	  text-align: center;
+	  cursor: pointer;
+	  transition: all 0.3s;
+	}
+	
+	.rule-item:hover {
+	  border-color: #e74c3c;
+	  background: #fff5f5;
+	  transform: translateY(-2px);
+	  box-shadow: 0 4px 12px rgba(231,76,60,0.2);
+	}
+	
+	.rule-item .rule-letter {
+	  font-size: 32px;
+	  color: #e74c3c;
+	  display: block;
+	  font-weight: bold;
+	}
+	
+	.rule-item .rule-name {
+	  font-size: 16px;
+	  color: #2c3e50;
+	  display: block;
+	  margin: 5px 0;
+	}
+	
+	.rule-item .rule-desc {
+	  font-size: 13px;
+	  color: #95a5a6;
+	  display: block;
+	}
+	
+	/* 音标表格 */
+	.phonetic-table {
+	  width: 100%;
+	  border-collapse: collapse;
+	}
+	
+	.table-row {
+	  display: grid;
+	  grid-template-columns: 1fr 1.5fr 1.5fr 1.5fr;
+	  border-bottom: 1px solid #eee;
+	}
+	
+	.table-row.header {
+	  background: #e74c3c;
+	  color: #fff;
+	  font-weight: bold;
+	  border-radius: 8px 8px 0 0;
+	}
+	
+	.table-cell {
+	  padding: 10px 8px;
+	  text-align: center;
+	  font-size: 14px;
+	}
+	
+	/* 音标网格 */
+	.phone-grid {
+	  display: grid;
+	  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+	  gap: 10px;
+	}
+	
+	.phone-item {
+	  background: #f8f9fa;
+	  border: 1px solid #e9ecef;
+	  border-radius: 10px;
+	  padding: 12px;
+	  text-align: center;
+	  cursor: pointer;
+	  transition: all 0.3s;
+	}
+	
+	.phone-item:hover {
+	  border-color: #3498db;
+	  background: #e8f4fd;
+	  transform: translateY(-2px);
+	}
+	
+	.phone-item .phone-symbol {
+	  font-size: 28px;
+	  color: #3498db;
+	  display: block;
+	  font-weight: bold;
+	}
+	
+	.phone-item .phone-example {
+	  font-size: 14px;
+	  color: #2c3e50;
+	  display: block;
+	  margin: 5px 0;
+	}
+	
+	.phone-item .phone-desc {
+	  font-size: 12px;
+	  color: #95a5a6;
+	  display: block;
+	}
+	
+	/* 规则列表 */
+	.rules-list {
+	  display: flex;
+	  flex-direction: column;
+	  gap: 15px;
+	}
+	
+	.rule-card {
+	  background: #f8f9fa;
+	  border-left: 4px solid #e74c3c;
+	  border-radius: 8px;
+	  padding: 15px;
+	}
+	
+	.rule-card h4 {
+	  color: #2c3e50;
+	  margin-bottom: 8px;
+	  font-size: 16px;
+	}
+	
+	.rule-card p {
+	  color: #666;
+	  font-size: 14px;
+	  line-height: 1.6;
+	}
+	
+	.rule-card .example-word {
+	  display: inline-block;
+	  background: #e74c3c;
+	  color: #fff;
+	  padding: 2px 10px;
+	  border-radius: 12px;
+	  margin: 3px;
+	  font-size: 13px;
+	  cursor: pointer;
+	}
+	
+	/* 练习区域 */
+	.practice-area {
+	  text-align: center;
+	  padding: 20px;
+	}
+	
+	.practice-display {
+	  font-size: 48px;
+	  color: #e74c3c;
+	  font-weight: bold;
+	  margin: 20px 0;
+	  min-height: 60px;
+	}
+	
+	.practice-controls button {
+	  padding: 12px 30px;
+	  margin: 5px;
+	  border: none;
+	  border-radius: 25px;
+	  font-size: 16px;
+	  cursor: pointer;
+	  transition: all 0.3s;
+	  font-weight: bold;
+	}
+	
+	.practice-controls button:first-child {
+	  background: #3498db;
+	  color: #fff;
+	}
+	
+	.practice-controls button:last-child {
+	  background: #e67e22;
+	  color: #fff;
+	}
+	
+	.practice-controls button:hover {
+	  transform: scale(1.05);
+	  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+	}
+	
+	.practice-meaning {
+	  font-size: 18px;
+	  color: #2c3e50;
+	  margin-top: 15px;
+	}
+	
+	/* 标签切换 */
+	.panel-content {
+	  display: block;
+	}
+	
+	.panel-content[style*="display: none"] {
+	  display: none;
+	}
+	</style>
+	
+	<script>
+	// ================================
+	//  拼音学习页面逻辑
+	// ================================
+	
+	// 声母数据
+	const pinyinInitialsData = [
+	  { symbol: 'b', ipa: '/p/', engLike: 'spot', example: 'bā (八)' },
+	  { symbol: 'p', ipa: '/pʰ/', engLike: 'pot', example: 'pá (爬)' },
+	  { symbol: 'm', ipa: '/m/', engLike: 'moon', example: 'mā (妈)' },
+	  { symbol: 'f', ipa: '/f/', engLike: 'fun', example: 'fā (发)' },
+	  { symbol: 'd', ipa: '/t/', engLike: 'stop', example: 'dà (大)' },
+	  { symbol: 't', ipa: '/tʰ/', engLike: 'top', example: 'tā (他)' },
+	  { symbol: 'n', ipa: '/n/', engLike: 'no', example: 'nǐ (你)' },
+	  { symbol: 'l', ipa: '/l/', engLike: 'look', example: 'lǜ (绿)' },
+	  { symbol: 'g', ipa: '/k/', engLike: 'skill', example: 'gē (歌)' },
+	  { symbol: 'k', ipa: '/kʰ/', engLike: 'kill', example: 'kàn (看)' },
+	  { symbol: 'h', ipa: '/x/', engLike: 'loch', example: 'hē (喝)' },
+	  { symbol: 'j', ipa: '/tɕ/', engLike: 'James', example: 'jiā (家)' },
+	  { symbol: 'q', ipa: '/tɕʰ/', engLike: 'cheap', example: 'qī (七)' },
+	  { symbol: 'x', ipa: '/ɕ/', engLike: 'sheet', example: 'xǐ (洗)' },
+	  { symbol: 'zh', ipa: '/ʈʂ/', engLike: 'jungle', example: 'zhōng (中)' },
+	  { symbol: 'ch', ipa: '/ʈʂʰ/', engLike: 'church', example: 'chē (车)' },
+	  { symbol: 'sh', ipa: '/ʂ/', engLike: 'shore', example: 'shū (书)' },
+	  { symbol: 'r', ipa: '/ʐ/', engLike: 'measure', example: 'rè (热)' },
+	  { symbol: 'z', ipa: '/ts/', engLike: 'pizza', example: 'zì (字)' },
+	  { symbol: 'c', ipa: '/tsʰ/', engLike: 'cats', example: 'cā (擦)' },
+	  { symbol: 's', ipa: '/s/', engLike: 'sun', example: 'sān (三)' },
+	];
+	
+	// 韵母数据
+	const pinyinFinalsData = [
+	  { symbol: 'a', ipa: '/a/', engLike: 'father', example: 'dà (大)' },
+	  { symbol: 'o', ipa: '/o/', engLike: 'lord', example: 'bó (伯)' },
+	  { symbol: 'e', ipa: '/ɤ/', engLike: 'stir', example: 'gē (歌)' },
+	  { symbol: 'i', ipa: '/i/', engLike: 'bee', example: 'yī (一)' },
+	  { symbol: 'u', ipa: '/u/', engLike: 'boot', example: 'dú (读)' },
+	  { symbol: 'ü', ipa: '/y/', engLike: 'French tu', example: 'lǜ (绿)' },
+	  { symbol: 'ai', ipa: '/ai/', engLike: 'sigh', example: 'bái (白)' },
+	  { symbol: 'ei', ipa: '/ei/', engLike: 'say', example: 'bēi (杯)' },
+	  { symbol: 'ao', ipa: '/ɑu/', engLike: 'cow', example: 'dāo (刀)' },
+	  { symbol: 'ou', ipa: '/ou/', engLike: 'go', example: 'gǒu (狗)' },
+	  { symbol: 'an', ipa: '/an/', engLike: 'can', example: 'kàn (看)' },
+	  { symbol: 'en', ipa: '/ən/', engLike: 'taken', example: 'běn (本)' },
+	  { symbol: 'ang', ipa: '/ɑŋ/', engLike: 'long', example: 'fàng (放)' },
+	  { symbol: 'eng', ipa: '/əŋ/', engLike: 'lung', example: 'dēng (灯)' },
+	  { symbol: 'ong', ipa: '/ʊŋ/', engLike: 'song', example: 'lóng (龙)' },
+	  { symbol: 'ia', ipa: '/ia/', engLike: 'ya', example: 'jiā (家)' },
+	  { symbol: 'ie', ipa: '/ie/', engLike: 'yeah', example: 'xiè (谢)' },
+	  { symbol: 'iu', ipa: '/iou/', engLike: 'yo', example: 'liú (留)' },
+	  { symbol: 'in', ipa: '/in/', engLike: 'seen', example: 'jìn (进)' },
+	  { symbol: 'ing', ipa: '/iŋ/', engLike: 'sing', example: 'xíng (行)' },
+	  { symbol: 'un', ipa: '/uən/', engLike: 'won', example: 'kūn (坤)' },
+	  { symbol: 'üe', ipa: '/yɛ/', engLike: 'you+ye', example: 'yuè (月)' },
+	];
+	
+	// 拼音组合练习
+	const pinyinPracticeWords = [
+	  { pinyin: 'bā', meaning: '八 (eight)' },
+	  { pinyin: 'mā', meaning: '妈 (mother)' },
+	  { pinyin: 'dà', meaning: '大 (big)' },
+	  { pinyin: 'tā', meaning: '他 (he/him)' },
+	  { pinyin: 'nǐ', meaning: '你 (you)' },
+	  { pinyin: 'lǜ', meaning: '绿 (green)' },
+	  { pinyin: 'gē', meaning: '歌 (song)' },
+	  { pinyin: 'kàn', meaning: '看 (look)' },
+	  { pinyin: 'hē', meaning: '喝 (drink)' },
+	  { pinyin: 'jiā', meaning: '家 (home)' },
+	  { pinyin: 'qī', meaning: '七 (seven)' },
+	  { pinyin: 'xǐ', meaning: '喜 (happy)' },
+	  { pinyin: 'zhōng', meaning: '中 (middle)' },
+	  { pinyin: 'chē', meaning: '车 (car)' },
+	  { pinyin: 'shū', meaning: '书 (book)' },
+	  { pinyin: 'rè', meaning: '热 (hot)' },
+	  { pinyin: 'zì', meaning: '字 (character)' },
+	  { pinyin: 'sān', meaning: '三 (three)' },
+	  { pinyin: 'fàng', meaning: '放 (put)' },
+	  { pinyin: 'dēng', meaning: '灯 (lamp)' },
+	  { pinyin: 'lóng', meaning: '龙 (dragon)' },
+	  { pinyin: 'yuè', meaning: '月 (moon)' },
+	  { pinyin: 'běn', meaning: '本 (book)' },
+	  { pinyin: 'xíng', meaning: '行 (ok)' },
+	];
+	
+	// 渲染声母表
+	function renderPinyinInitials() {
+	  const container = document.getElementById('pinyinInitials');
+	  pinyinInitialsData.forEach(item => {
+	    const row = document.createElement('div');
+	    row.className = 'table-row';
+	    row.onclick = () => playPinyinAudio(item.symbol);
+	    row.innerHTML = `
+	      <div class="table-cell">${item.symbol}</div>
+	      <div class="table-cell">${item.ipa}</div>
+	      <div class="table-cell">${item.engLike}</div>
+	      <div class="table-cell">${item.example}</div>
+	    `;
+	    container.appendChild(row);
+	  });
+	}
+	
+	// 渲染韵母表
+	function renderPinyinFinals() {
+	  const container = document.getElementById('pinyinFinals');
+	  pinyinFinalsData.forEach(item => {
+	    const row = document.createElement('div');
+	    row.className = 'table-row';
+	    row.onclick = () => playPinyinAudio(item.symbol);
+	    row.innerHTML = `
+	      <div class="table-cell">${item.symbol}</div>
+	      <div class="table-cell">${item.ipa}</div>
+	      <div class="table-cell">${item.engLike}</div>
+	      <div class="table-cell">${item.example}</div>
+	    `;
+	    container.appendChild(row);
+	  });
+	}
+	
+	// 播放拼音发音（使用Web Speech API）
+	function playPinyinAudio(text) {
+	  if ('speechSynthesis' in window) {
+	    window.speechSynthesis.cancel();
+	    const utterance = new SpeechSynthesisUtterance(text);
+	    utterance.lang = 'zh-CN';
+	    utterance.rate = 0.8;
+	    utterance.pitch = 1;
+	    window.speechSynthesis.speak(utterance);
+	  } else {
+	    alert('您的浏览器不支持语音合成，请使用Chrome浏览器');
+	  }
+	}
+	
+	// 生成随机拼音练习
+	function generatePinyin() {
+	  const word = pinyinPracticeWords[Math.floor(Math.random() * pinyinPracticeWords.length)];
+	  document.getElementById('pinyinDisplay').textContent = word.pinyin;
+	  document.getElementById('pinyinMeaning').textContent = word.meaning;
+	}
+	
+	// 初始化拼音页面
+	renderPinyinInitials();
+	renderPinyinFinals();
+	generatePinyin();
+	
+	// ================================
+	//  英语发音规则页面逻辑
+	// ================================
+	
+	// 元音数据
+	const vowelData = [
+	  { symbol: '/iː/', example: 'see', desc: '长音i' },
+	  { symbol: '/ɪ/', example: 'sit', desc: '短音i' },
+	  { symbol: '/e/', example: 'bed', desc: '短音e' },
+	  { symbol: '/æ/', example: 'cat', desc: '大口e' },
+	  { symbol: '/ɑː/', example: 'car', desc: '长音a' },
+	  { symbol: '/ɒ/', example: 'hot', desc: '短音o' },
+	  { symbol: '/ɔː/', example: 'saw', desc: '长音o' },
+	  { symbol: '/ʊ/', example: 'put', desc: '短音u' },
+	  { symbol: '/uː/', example: 'boot', desc: '长音u' },
+	  { symbol: '/ʌ/', example: 'cup', desc: '短倒a' },
+	  { symbol: '/ɜː/', example: 'bird', desc: '卷舌音' },
+	  { symbol: '/ə/', example: 'about', desc: '中性元音' },
+	];
+	
+	const diphthongData = [
+	  { symbol: '/eɪ/', example: 'say', desc: '合口双元音' },
+	  { symbol: '/aɪ/', example: 'time', desc: '合口双元音' },
+	  { symbol: '/ɔɪ/', example: 'boy', desc: '合口双元音' },
+	  { symbol: '/aʊ/', example: 'now', desc: '合口双元音' },
+	  { symbol: '/əʊ/', example: 'go', desc: '合口双元音' },
+	  { symbol: '/ɪə/', example: 'hear', desc: '集中双元音' },
+	  { symbol: '/eə/', example: 'hair', desc: '集中双元音' },
+	  { symbol: '/ʊə/', example: 'poor', desc: '集中双元音' },
+	];
+	
+	// 辅音数据
+	const voicelessData = [
+	  { symbol: '/p/', example: 'pen', desc: '清唇音' },
+	  { symbol: '/t/', example: 'tea', desc: '清齿龈音' },
+	  { symbol: '/k/', example: 'cat', desc: '清软腭音' },
+	  { symbol: '/f/', example: 'fun', desc: '清唇齿音' },
+	  { symbol: '/θ/', example: 'think', desc: '清齿音' },
+	  { symbol: '/s/', example: 'see', desc: '清齿龈音' },
+	  { symbol: '/ʃ/', example: 'she', desc: '清龈腭音' },
+	  { symbol: '/h/', example: 'hat', desc: '清喉音' },
+	  { symbol: '/tʃ/', example: 'check', desc: '清塞擦音' },
+	  { symbol: '/ts/', example: 'cats', desc: '清塞擦音' },
+	  { symbol: '/tr/', example: 'tree', desc: '清卷舌音' },
+	];
+	
+	const voicedData = [
+	  { symbol: '/b/', example: 'bed', desc: '浊唇音' },
+	  { symbol: '/d/', example: 'dog', desc: '浊齿龈音' },
+	  { symbol: '/g/', example: 'go', desc: '浊软腭音' },
+	  { symbol: '/v/', example: 'van', desc: '浊唇齿音' },
+	  { symbol: '/ð/', example: 'this', desc: '浊齿音' },
+	  { symbol: '/z/', example: 'zoo', desc: '浊齿龈音' },
+	  { symbol: '/ʒ/', example: 'treasure', desc: '浊龈腭音' },
+	  { symbol: '/m/', example: 'man', desc: '浊鼻音' },
+	  { symbol: '/n/', example: 'no', desc: '浊鼻音' },
+	  { symbol: '/ŋ/', example: 'sing', desc: '浊软腭鼻音' },
+	  { symbol: '/l/', example: 'lift', desc: '浊边音' },
+	  { symbol: '/r/', example: 'red', desc: '浊卷舌音' },
+	  { symbol: '/j/', example: 'yes', desc: '浊硬腭音' },
+	  { symbol: '/w/', example: 'we', desc: '浊双唇音' },
+	  { symbol: '/dʒ/', example: 'joy', desc: '浊塞擦音' },
+	  { symbol: '/dz/', example: 'beds', desc: '浊塞擦音' },
+	  { symbol: '/dr/', example: 'dress', desc: '浊卷舌音' },
+	];
+	
+	// 发音规则
+	const pronunciationRules = [
+	  {
+	    title: '连读 (Linking)',
+	    content: '当前一个单词以辅音结尾，后一个单词以元音开头时，辅音要与元音连起来读。',
+	    examples: ['not at all', 'get up', 'come on']
+	  },
+	  {
+	    title: '失去爆破 (Loss of Plosion)',
+	    content: '爆破音 /p, b, t, d, k, g/ 后面紧跟另一个辅音时，爆破音只做口型不发声。',
+	    examples: ['good night', 'big deal', 'what time']
+	  },
+	  {
+	    title: '同化 (Assimilation)',
+	    content: '相邻的两个音互相影响，变成相同或相似的音。常见如 /t/ + /j/ = /tʃ/。',
+	    examples: ['last year', 'don\'t you', 'nice to meet you']
+	  },
+	  {
+	    title: '弱读 (Weak Forms)',
+	    content: '功能词（如to, and, for）在句子中通常弱读为最简音，如to /tə/。',
+	    examples: ['I want to go', 'bread and butter', 'come for dinner']
+	  },
+	  {
+	    title: '重音规则 (Word Stress)',
+	    content: '双音节名词通常重音在前，动词重音在后。如 \'record (名词) vs re\'cord (动词)。',
+	    examples: ['present (礼物)', 'present (呈现)', 'perfect (完美)']
+	  },
+	  {
+	    title: '特殊发音 (Silent Letters)',
+	    content: '英语中有很多不发音字母，如k在kn-开头时，b在mb结尾时。',
+	    examples: ['know', 'knee', 'comb', 'doubt', 'island']
+	  },
+	];
+	
+	// 音标练习词汇
+	const phoneticsPracticeWords = [
+	  { phonetic: '/θɪŋk/', word: 'think', meaning: '思考' },
+	  { phonetic: '/ðɪs/', word: 'this', meaning: '这个' },
+	  { phonetic: '/ˈfʌni/', word: 'funny', meaning: '有趣的' },
+	  { phonetic: '/biːtʃ/', word: 'beach', meaning: '海滩' },
+	  { phonetic: '/naɪt/', word: 'night', meaning: '夜晚' },
+	  { phonetic: '/tʃeɪndʒ/', word: 'change', meaning: '改变' },
+	  { phonetic: '/ˈmʌðə/', word: 'mother', meaning: '母亲' },
+	  { phonetic: '/breθ/', word: 'breath', meaning: '呼吸' },
+	  { phonetic: '/tʃaɪld/', word: 'child', meaning: '孩子' },
+	  { phonetic: '/pleɪ/', word: 'play', meaning: '玩耍' },
+	  { phonetic: '/driːm/', word: 'dream', meaning: '梦想' },
+	  { phonetic: '/flaʊə/', word: 'flower', meaning: '花' },
+	  { phonetic: '/kwaɪət/', word: 'quiet', meaning: '安静' },
+	  { phonetic: '/wɜːld/', word: 'world', meaning: '世界' },
+	  { phonetic: '/ˈbjuːtɪfl/', word: 'beautiful', meaning: '美丽的' },
+	];
+	
+	// 切换子标签
+	function switchSubTab(tab) {
+	  document.querySelectorAll('#phoneticsPage .tab-btn').forEach(btn => {
+	    btn.style.background = '#ecf0f1';
+	    btn.style.color = '#555';
+	  });
+	  event.target.style.background = '#e74c3c';
+	  event.target.style.color = '#fff';
+	  
+	  document.getElementById('vowelsPanel').style.display = tab === 'vowels' ? 'block' : 'none';
+	  document.getElementById('consonantsPanel').style.display = tab === 'consonants' ? 'block' : 'none';
+	  document.getElementById('rulesPanel').style.display = tab === 'rules' ? 'block' : 'none';
+	}
+	
+	// 渲染音标网格
+	function renderPhoneGrid(containerId, data) {
+	  const container = document.getElementById(containerId);
+	  data.forEach(item => {
+	    const div = document.createElement('div');
+	    div.className = 'phone-item';
+	    div.onclick = () => {
+	      playPhoneticUrl(item.example);
+	      document.getElementById('phoneticDisplay').textContent = item.symbol;
+	      document.getElementById('phoneticMeaning').textContent = `${item.example} (${item.desc})`;
+	    };
+	    div.innerHTML = `
+	      <span class="phone-symbol">${item.symbol}</span>
+	      <span class="phone-example">${item.example}</span>
+	      <span class="phone-desc">${item.desc}</span>
+	    `;
+	    container.appendChild(div);
+	  });
+	}
+	
+	// 渲染发音规则
+	function renderRules() {
+	  const container = document.getElementById('rulesList');
+	  pronunciationRules.forEach(rule => {
+	    const div = document.createElement('div');
+	    div.className = 'rule-card';
+	    const examples = rule.examples.map(w => 
+	      `<span class="example-word" onclick="playWordPronunciation('${w}')">${w}</span>`
+	    ).join(' ');
+	    div.innerHTML = `
+	      <h4>${rule.title}</h4>
+	      <p>${rule.content}</p>
+	      <p style="margin-top:8px;"><strong>示例：</strong> ${examples}</p>
+	    `;
+	    container.appendChild(div);
+	  });
+	}
+	
+	// 播放英语发音
+	function playPhoneticAudio() {
+	  const text = document.getElementById('phoneticMeaning').textContent;
+	  const word = text.split(' ')[0];
+	  playWordPronunciation(word);
+	}
+	
+	function playWordPronunciation(word) {
+	  if ('speechSynthesis' in window) {
+	    window.speechSynthesis.cancel();
+	    const utterance = new SpeechSynthesisUtterance(word);
+	    utterance.lang = 'en-US';
+	    utterance.rate = 0.7;
+	    utterance.pitch = 1;
+	    window.speechSynthesis.speak(utterance);
+	  }
+	}
+	
+	function playPhoneticUrl(word) {
+	  playWordPronunciation(word);
+	}
+	
+	// 随机生成音标练习
+	function generatePhonetic() {
+	  const word = phoneticsPracticeWords[Math.floor(Math.random() * phoneticsPracticeWords.length)];
+	  document.getElementById('phoneticDisplay').textContent = word.phonetic;
+	  document.getElementById('phoneticMeaning').textContent = `${word.word} (${word.meaning})`;
+	}
+	
+	// 初始化发音页面
+	renderPhoneGrid('vowelList', vowelData);
+	renderPhoneGrid('diphthongList', diphthongData);
+	renderPhoneGrid('voicelessList', voicelessData);
+	renderPhoneGrid('voicedList', voicedData);
+	renderRules();
+	generatePhonetic();
+	
+	// 页面显示时重置发音引擎
+	document.addEventListener('visibilitychange', () => {
+	  if (!document.hidden) {
+	    window.speechSynthesis.cancel();
+	  }
+	});
+	// ================================
+	//  语音独白系统（旁白解说）
+	// ================================
+	
+	// 拼音旁白脚本
+	const pinyinScript = [
+	  { text: '欢迎来到拼音学习页面。拼音是学习中文发音的基础工具。', delay: 1000 },
+	  { text: '首先，我们来学习四个声调。第一声是高平调，符号是 ā。', delay: 3000 },
+	  { text: '第二声是升调，符号是 á。', delay: 2000 },
+	  { text: '第三声是先降后升，符号是 ǎ。', delay: 2000 },
+	  { text: '第四声是降调，符号是 à。', delay: 2000 },
+	  { text: '声母是拼音的开头辅音，一共有21个。比如 b、p、m、f。', delay: 3000 },
+	  { text: '韵母是拼音的元音部分，有单韵母和复韵母。比如 a、o、e、i、u、ü。', delay: 3000 },
+	  { text: '现在我们来练习拼读。点击随机生成按钮，可以练习不同的拼音组合。', delay: 3000 },
+	  { text: '注意：zh、ch、sh 是翘舌音，发音时舌尖要向上卷。', delay: 3000 },
+	  { text: 'j、q、x 是舌面音，发音时舌面要抬起靠近硬腭。', delay: 3000 },
+	  { text: 'z、c、s 是平舌音，发音时舌尖抵住下齿背。', delay: 3000 },
+	  { text: '韵母 ü 在 j、q、x 后面时，两点要省略，写成 u 但读 ü。', delay: 3000 },
+	  { text: '多听多练是学好拼音的关键。祝您学习愉快！', delay: 2000 },
+	];
+	
+	// 英语发音旁白脚本
+	const phoneticsScript = [
+	  { text: 'Welcome to English pronunciation learning page.', delay: 1000 },
+	  { text: 'First, let us learn the vowel sounds. Vowels are the core of English pronunciation.', delay: 3000 },
+	  { text: 'There are 12 monophthongs, or pure vowels, in English.', delay: 2500 },
+	  { text: 'For example, the long e sound in "see", and the short i sound in "sit".', delay: 3000 },
+	  { text: 'There are also 8 diphthongs, which are combinations of two vowel sounds.', delay: 3000 },
+	  { text: 'For example, the "ai" sound in "time", and the "oi" sound in "boy".', delay: 3000 },
+	  { text: 'Now let us learn the consonant sounds. Consonants are sounds made with obstruction of airflow.', delay: 3000 },
+	  { text: 'There are 11 voiceless consonants and 17 voiced consonants.', delay: 2500 },
+	  { text: 'A very important sound is the th sound. Put your tongue between your teeth.', delay: 3000 },
+	  { text: 'The voiceless th in "think" and the voiced th in "this" are different.', delay: 3000 },
+	  { text: 'Now let us learn some pronunciation rules. Linking is when we connect words together.', delay: 3000 },
+	  { text: 'For example, "not at all" sounds like "no-ta-tall".', delay: 2500 },
+	  { text: 'Loss of plosion is when we do not release certain stop sounds.', delay: 2500 },
+	  { text: 'Practice makes perfect. Keep listening and speaking every day!', delay: 2000 },
+	];
+	
+	let pinyinNarrator = null;
+	let phoneticsNarrator = null;
+	let narrationPlaying = false;
+	
+	// 播放拼音旁白
+	function playPinyinNarration() {
+	  if (narrationPlaying) {
+	    stopAllNarration();
+	    return;
+	  }
+	  
+	  narrationPlaying = true;
+	  const btn = document.querySelector('#pinyinPage .narration-btn');
+	  if (btn) btn.textContent = '⏹️ 停止旁白';
+	  
+	  let index = 0;
+	  pinyinNarrator = setInterval(() => {
+	    if (index >= pinyinScript.length) {
+	      stopAllNarration();
+	      return;
+	    }
+	    
+	    // 显示旁白文字
+	    showNarrationBubble(pinyinScript[index].text, '#pinyinPage');
+	    
+	    // 朗读
+	    speakText(pinyinScript[index].text, 'zh-CN');
+	    
+	    index++;
+	  }, pinyinScript[0]?.delay || 3000);
+	}
+	
+	// 播放英语旁白
+	function playPhoneticsNarration() {
+	  if (narrationPlaying) {
+	    stopAllNarration();
+	    return;
+	  }
+	  
+	  narrationPlaying = true;
+	  const btn = document.querySelector('#phoneticsPage .narration-btn');
+	  if (btn) btn.textContent = '⏹️ 停止旁白';
+	  
+	  let index = 0;
+	  phoneticsNarrator = setInterval(() => {
+	    if (index >= phoneticsScript.length) {
+	      stopAllNarration();
+	      return;
+	    }
+	    
+	    // 显示旁白文字
+	    showNarrationBubble(phoneticsScript[index].text, '#phoneticsPage');
+	    
+	    // 朗读
+	    speakText(phoneticsScript[index].text, 'en-US');
+	    
+	    index++;
+	  }, phoneticsScript[0]?.delay || 3000);
+	}
+	
+	// 停止所有旁白
+	function stopAllNarration() {
+	  if (pinyinNarrator) {
+	    clearInterval(pinyinNarrator);
+	    pinyinNarrator = null;
+	  }
+	  if (phoneticsNarrator) {
+	    clearInterval(phoneticsNarrator);
+	    phoneticsNarrator = null;
+	  }
+	  
+	  narrationPlaying = false;
+	  
+	  // 重置按钮文字
+	  document.querySelectorAll('.narration-btn').forEach(btn => {
+	    btn.textContent = '🎙️ 语音讲解';
+	  });
+	  
+	  // 隐藏气泡
+	  document.querySelectorAll('.narration-bubble').forEach(b => b.remove());
+	  
+	  // 停止语音
+	  if ('speechSynthesis' in window) {
+	    window.speechSynthesis.cancel();
+	  }
+	}
+	
+	// 显示旁白气泡
+	function showNarrationBubble(text, parentSelector) {
+	  // 移除旧气泡
+	  document.querySelectorAll('.narration-bubble').forEach(b => b.remove());
+	  
+	  const bubble = document.createElement('div');
+	  bubble.className = 'narration-bubble';
+	  bubble.textContent = text;
+	  bubble.style.cssText = `
+	    position: fixed;
+	    bottom: 80px;
+	    left: 50%;
+	    transform: translateX(-50%);
+	    background: rgba(0,0,0,0.85);
+	    color: #fff;
+	    padding: 20px 30px;
+	    border-radius: 20px;
+	    font-size: 18px;
+	    max-width: 600px;
+	    text-align: center;
+	    z-index: 1000;
+	    box-shadow: 0 8px 30px rgba(0,0,0,0.3);
+	    animation: fadeInUp 0.5s ease;
+	    border: 2px solid #e74c3c;
+	    backdrop-filter: blur(10px);
+	  `;
+	  
+	  document.body.appendChild(bubble);
+	  
+	  // 5秒后自动消失
+	  setTimeout(() => {
+	    if (bubble.parentNode) bubble.remove();
+	  }, 5000);
+	}
+	
+	// 朗读文本
+	function speakText(text, lang = 'zh-CN') {
+	  if ('speechSynthesis' in window) {
+	    window.speechSynthesis.cancel();
+	    const utterance = new SpeechSynthesisUtterance(text);
+	    utterance.lang = lang;
+	    utterance.rate = 0.85;
+	    utterance.pitch = 1.1;
+	    utterance.volume = 1;
+	    window.speechSynthesis.speak(utterance);
+	  }
+	}
+	
+	// 添加动画样式
+	const narrationStyle = document.createElement('style');
+	narrationStyle.textContent = `
+	  @keyframes fadeInUp {
+	    from {
+	      opacity: 0;
+	      transform: translateX(-50%) translateY(20px);
+	    }
+	    to {
+	      opacity: 1;
+	      transform: translateX(-50%) translateY(0);
+	    }
+	  }
+	  
+	  .narration-btn {
+	    background: linear-gradient(135deg, #e74c3c, #c0392b) !important;
+	    color: #fff !important;
+	    font-size: 18px !important;
+	    padding: 15px 40px !important;
+	    border-radius: 30px !important;
+	    border: none !important;
+	    cursor: pointer !important;
+	    transition: all 0.3s !important;
+	    box-shadow: 0 4px 15px rgba(231,76,60,0.3) !important;
+	    margin: 10px !important;
+	  }
+	  
+	  .narration-btn:hover {
+	    transform: scale(1.05) !important;
+	    box-shadow: 0 6px 20px rgba(231,76,60,0.5) !important;
+	  }
+	  
+	  .narration-btn:active {
+	    transform: scale(0.95) !important;
+	  }
+	`;
+	document.head.appendChild(narrationStyle);
+	
+	// 在拼音页面和发音页面添加旁白按钮
+	document.addEventListener('DOMContentLoaded', () => {
+	  // 为拼音页面添加旁白按钮
+	  const pinyinPage = document.getElementById('pinyinPage');
+	  if (pinyinPage && !pinyinPage.querySelector('.narration-btn')) {
+	    const btnContainer = document.createElement('div');
+	    btnContainer.style.cssText = 'text-align: center; margin: 20px 0;';
+	    btnContainer.innerHTML = `
+	      <button class="narration-btn" onclick="playPinyinNarration()">🎙️ 语音讲解</button>
+	    `;
+	    pinyinPage.querySelector('.practice-area')?.after(btnContainer);
+	  }
+	  
+	  // 为发音页面添加旁白按钮
+	  const phoneticsPage = document.getElementById('phoneticsPage');
+	  if (phoneticsPage && !phoneticsPage.querySelector('.narration-btn')) {
+	    const btnContainer = document.createElement('div');
+	    btnContainer.style.cssText = 'text-align: center; margin: 20px 0;';
+	    btnContainer.innerHTML = `
+	      <button class="narration-btn" onclick="playPhoneticsNarration()">🎙️ 语音讲解</button>
+	    `;
+	    phoneticsPage.querySelector('.practice-area')?.after(btnContainer);
+	  }
+	});
+	
+	// 页面切换时停止旁白
+	const originalShowPage = window.showPage;
+	if (originalShowPage) {
+	  window.showPage = function(pageId) {
+	    stopAllNarration();
+	    originalShowPage(pageId);
+	  };
+	}
+</body>
+</html>
